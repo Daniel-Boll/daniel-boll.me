@@ -1,0 +1,52 @@
+.post p {
+  @apply leading-7;
+}
+
+.post code {
+  @apply rounded-md bg-black px-1 py-[2px] text-red-500;
+}
+
+.post h2 {
+  @apply mt-6 text-3xl text-neutral-100;
+}
+
+.post h3 {
+  @apply mt-4 text-xl text-neutral-100;
+}
+
+.post a {
+  @apply text-neutral-100 underline;
+}
+
+.post strong {
+  @apply text-orange-500;
+}
+
+.post ul {
+  @apply list-disc;
+}
+
+.post blockquote {
+  @apply flex flex-row gap-2 before:block before:h-auto before:w-1 before:max-w-[1px] before:bg-red-400 before:content-[''];
+}
+
+div[data-rehype-pretty-code-fragment] {
+  @apply relative w-full rounded-md;
+}
+
+.post
+  div[data-rehype-pretty-code-fragment]:has([data-rehype-pretty-code-title]) {
+  @apply pt-7 lg:pt-10;
+}
+
+.post div[data-rehype-pretty-code-title] {
+  @apply absolute top-0 left-0 w-full rounded-t bg-zinc-900 py-1 px-2 text-sm text-slate-200 lg:px-4 lg:py-2;
+}
+
+div[data-rehype-pretty-code-fragment] pre {
+  @apply border-none px-0 overflow-x-auto;
+}
+
+div[data-rehype-pretty-code-fragment] code {
+  @apply flex flex-col;
+}

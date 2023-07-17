@@ -1,0 +1,56 @@
+---
+import { CollectionEntry, getCollection } from "astro:content";
+import { Image } from "astro:assets";
+
+import Layout from "@/layouts/Layout.astro";
+import formatDate from "@/utils/formatDate";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("posts");
+
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: post,
+  }));
+}
+
+type Post = CollectionEntry<"posts">;
+
+type Props = {
+  readingTime: string;
+} & Post;
+
+const { 
+  data: {
+    title, 
+    publishedAt, 
+    description,
+    cover,
+    coverAlt
+  }, 
+  render,
+} = Astro.props;
+const { Content, remarkPluginFrontmatter: { readingTime } } = await render();
+---
+
+<Layout title={title}>
+  <main class="post mx-auto flex w-full min-w-prose flex-col gap-4">
+
+    <div class="md:flex space-x-10">
+      <div class="w-full">
+        <div class="not-prose">
+          {cover && coverAlt && <Image class="my-10 mb-1 rounded-xl" src={cover} alt={coverAlt} sizes="680" />}
+        </div>
+      </div>
+    </div>
+    <header role="presentation">
+      <h1 class="text-lg font-bold text-center">
+        {title}
+      </h1>
+      <p class="italic text-center">{description} - {formatDate(publishedAt)}</p>
+      <p class="text-sm text-gray-500">{readingTime}</p>
+    </header>
+
+    <Content />
+  </main>
+</Layout>

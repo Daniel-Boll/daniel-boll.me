@@ -1,0 +1,132 @@
+---
+title: "How do I structure my C++ projects"
+publishedAt: 2023-01-20
+description: "Using a simple lua configured builder and package manager."
+slug: "how-do-i-structure-my-cpp-projects"
+isPublish: true
+---
+
+I have always felt that work in C++ projects was too cumbersome. I wanted to have a simple way to create a project, and I wanted to have a simple way to build and test it.
+
+C/C++ third-party libraries are a pain to build, historically. You have to download the source, configure, build, and install it. This is a pain, especially if you are not using a package manager.
+
+---
+
+## [xmake] for the rescue
+
+> xmake is a lightweight cross-platform build utility based on Lua. It uses xmake.lua to maintain project builds. Compared with makefile/CMakeLists.txt, the configuration syntax is more concise and intuitive. It is very friendly to novices and can quickly get started in a short time. Let users focus more on actual project development.
+
+xmake is awesome and extremely easy for simple and even more complex and robust projects, it works as a package manager (which was the selling point for me) and as a project generator + build backend.
+
+The **installation** can be done through `curl`, but there are other methods in their docs.
+
+```bash title="terminal"
+bash <(curl -fsSL https://xmake.io/shget.text)
+```
+
+## Sample project
+
+To create a project we run:
+
+```sh title="terminal" /(xmake|create)/
+xmake create sample-project # Notice that sample-project is the name, you can choose any other
+```
+
+The xmake.lua file should look like this:
+
+```lua title="xmake.lua"
+add_rules("mode.debug", "mode.release")
+
+target("sample-project")
+    set_kind("binary")
+    add_files("src/*.cpp")
+
+-- A bunch of comments
+```
+
+First, I usually set the language to use the standard c++20 with `set_languages("c++20"){:lua}`, then I add a list of libs that this project will have, for now, I will only include the **[\{fmt\}]** lib with local `libs = { "fmt" }{:lua}`, removing the comments it should look like this now:
+
+
+```lua title="xmake.lua" {1,4}
+set_languages("c++20")
+add_rules("mode.debug", "mode.release")
+
+local libs = { "fmt" }
+
+target("sample-project")
+    set_kind("binary")
+    add_files("src/*.cpp")
+```
+
+The folder structure that I adopted is having the includes and source folder for the application-specific scope like a library implementation and the standalone folder as the binary API entry point for the library.
+
+```sh title="tree"
+.
+├── benchmark         (optional in case we need benchmark)
+├── include
+├── source
+├── standalone
+│   └── main.cpp
+├── test              (optional in case we need tests)
+└── xmake.lua
+```
+
+As we added the include and source folder for the library we need to adapt xmake.lua
+
+```lua title="xmake.lua" /NOTE/ {6-7,11-12,14-18}
+set_languages("c++20")
+add_rules("mode.debug", "mode.release")
+
+local libs = { "fmt" }
+
+add_includedirs("include")
+add_requires(table.unpack(libs))
+
+target("sample-project-lib")
+  set_kind("static")
+  add_files("source/**/*.cpp")
+  add_packages(table.unpack(libs))
+
+target("sample-project")
+  set_kind("binary")
+  add_files("standalone/main.cpp")
+  add_packages(table.unpack(libs))
+  add_deps("sample-project-lib")
+
+-- NOTE: Requires a test library to be installed
+-- target("test")
+--   set_kind("binary")
+--   add_files("test/*.cpp")
+--   add_packages(table.unpack(libs))
+--   add_deps("sample-project-lib")
+
+-- NOTE: Requires a benchmark library to be installed
+-- target("benchmark")
+--   set_kind("binary")
+--   add_files("benchmark/*.cpp")
+--   add_packages(table.unpack(libs))
+--   add_deps("sample-project-lib")
+```
+
+Now that we added the packages to the binary standalone when we run xmake to compile it the next time it'll be prompting us to download **[\{fmt\}]** through xrepo, the first time we download a version of a library it'll keep it at `~/.xmake/packages` for future projects.
+
+Now, with <strong>standalone/main.cpp</strong> like
+
+```cpp
+#include <fmt/core.h>
+
+auto main() -> int {
+  fmt::print("Hello, {}!\n", "world");
+  return 0;
+}
+```
+
+We can run ```xmake && xmake run{:sh}``` to build and run the default target, if we want to specify another target we can run ```xmake run target_name{:sh}``` would produce the same effect as ```xmake run sample-project{:sh}```.
+
+## Boilerplate Repo
+
+If you are looking for a easy to begin with boilerplate I've created one at my GitHub, [xmake-boilerplate].
+
+[xmake]:https://xmake.io/#/
+[\{fmt\}]:https://fmt.dev/latest/index.html
+[xmake-boilerplate]:https://github.com/daniel-boll/xmake-boilerplate
