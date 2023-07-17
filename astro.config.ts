@@ -30,7 +30,7 @@ export default defineConfig({
     rehypePlugins: [[rehypePrettyCode, prettyCodeOptions]],
     remarkPlugins: [remarkReadingTime],
   },
-  output: "server",
+  output: "hybrid",
   adapter: vercel({
     analytics: true,
     imageService: true,
