@@ -31,5 +31,8 @@ export default defineConfig({
     remarkPlugins: [remarkReadingTime],
   },
   output: "server",
-  adapter: vercel(),
+  adapter: vercel({
+    analytics: true,
+    imageService: true,
+  }),
 });
