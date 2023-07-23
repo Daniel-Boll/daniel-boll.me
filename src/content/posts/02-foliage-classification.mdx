@@ -1,0 +1,119 @@
+---
+title: "Foliage Classification"
+publishedAt: 2023-05-24
+description: "Foliage Classification Machine Learning with manual feature extraction"
+slug: "foliage-classification"
+---
+
+import Interlocutor from "@/components/mdx/Interlocutor.astro";
+
+import { Image } from "astro:assets";
+import theDatasetImage from "../../assets/posts/02/the_dataset.jpg";
+
+<Interlocutor emoji="🚧">
+  This post is a work in progress. It's not finished yet, but I'm working on it. Stay tuned!
+</Interlocutor>
+
+> In my Digital Image Processing course, we were tasked with a challenging project. The goal was to create a system capable of analyzing images of six different plant species. The system had to be trained using a dataset of 36 images, and once trained, it should be able to analyze all images in a specified folder. The final output of the system was to generate a comprehensive report containing information about each analyzed image, including the name of the image file. In the following sections, I will detail how I approached and solved this problem.
+
+## Getting to Know Our Leafy Subjects: An Introduction to the Dataset
+
+The first thing we needed to do in this project was getting to grips with the dataset. We had 36 images, each packed with different plant species – six in total. However, there was a hitch. None of the images were labeled. So, all we had were a bunch of leaf images from various plants, without any indications of which leaf belonged to which plant.
+
+<Image
+  src={theDatasetImage}
+  alt="A image from the dataset"
+  class="md:w-1/2 md:h-1/2 self-center"
+/>
+
+<figcaption class="text-center italic text-xs">
+  <strong>Figure 1:</strong> A image from the dataset
+</figcaption>
+
+Here's an example image from the dataset. As you can see, it's not immediately clear which leaf belongs to which plant species. We were truly in uncharted territory.
+
+## The Problem: Tackling an Unlabeled Dataset and Close Neighbors
+
+Working with an unlabeled dataset was our first hurdle. Most of my prior machine learning experience had been with supervised learning, where you have clear labels for training data. But in this case, we had to get our hands dirty and dive into the deep end of unsupervised machine learning.
+
+Our task was to label the data manually, which meant separating each leaf from the images and then assigning them a label. And if that wasn't enough, some leaves were too close together, which made them hard to separate. Picture two pieces of paper glued together, and you get the idea.
+
+## Creating the Environment: Welcome to the Python World
+
+The next step in our journey was to set up our working environment. We decided to use Python, a favorite in the machine learning realm, for its simplicity and robustness. Plus, it's got a treasure trove of useful libraries and tools, making it an excellent choice for this project.
+
+To create a consistent and portable development environment, we used Docker. This allowed us to package up the application with all of the parts it needed and run it anywhere Docker is installed. Below is the Dockerfile we used:
+
+```dockerfile title="Dockerfile" {2} /requirements\.txt/#i
+# Use an official Tensorflow runtime as a parent image
+FROM tensorflow/tensorflow:latest-gpu-jupyter
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Add local directory's content to the docker image under /app 
+ADD . /app
+
+# Allow statements and log messages to immediately appear in the Knative logs
+ENV PYTHONUNBUFFERED True
+
+RUN apt-get update && apt-get install -y \
+    wget \
+    libcairo2-dev \
+    libgl1-mesa-glx \
+    python3-tk
+
+# Install any needed packages specified in the requirements file
+COPY requirements.txt /app
+RUN pip install --no-cache-dir -r requirements.txt 
+```
+
+We used the official Tensorflow image as our base and installed some additional packages that we needed. We also copied our local directory content into the docker image and installed the necessary Python packages from our requirements.txt file.
+
+<Interlocutor emoji="🤠">
+  At the start, our project was without a _requirements.txt_, the lifeline of Python dependencies. An attempt to create one with pip freeze fell flat _(image analysis can be picky!)_. So, we found ourselves manually jotting down dependencies as we progressed. Ah, the joy of unexpected surprises in coding! Should have used **Poetry**.
+</Interlocutor>
+
+To manage our Docker environment more easily, we used Docker Compose. Here's the docker-compose.yml file we used:
+
+```yaml title="docker-compose.yml"
+version: '3'
+
+services:
+  tensorflow:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "5000:5000"
+    command: /bin/bash
+```
+
+With this setup, we were able to persist our data across Docker sessions, as Docker Compose takes care of the volumes for us.
+
+Finally, we created a Makefile to automate our common tasks, such as building the Docker image, running the Docker container, and running our main Python script:
+
+```make title="Makefile" {6}
+.PHONY: build run sudo_run help
+
+help: ## Show this help
+	@echo "Available targets:"
+	@echo
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+build: ## Build the Docker image
+	docker-compose build
+
+run: ## Run the Docker container
+	docker-compose run -u $(shell id -u):$(shell id -g) tensorflow bash
+
+sudo_run: ## Run the Docker container as sudo
+	docker-compose run tensorflow bash
+
+drun: clean ## Run the code within the docker
+	python src/main.py
+```
+
+<Interlocutor emoji="🤤">
+  Sweet **AWK** juice to make a automatic `help` message in Make.
+</Interlocutor>

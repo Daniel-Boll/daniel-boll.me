@@ -15,7 +15,7 @@
 }
 
 .post a {
-  @apply text-neutral-100 underline;
+  @apply text-neutral-100 no-underline;
 }
 
 .post strong {
