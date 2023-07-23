@@ -11,6 +11,8 @@ import { SITE_URL } from "./src/data/config";
 import { remarkReadingTime } from "./src/plugins";
 import fs from "fs";
 import vercel from "@astrojs/vercel/serverless";
+import Icons from "unplugin-icons/vite";
+
 const prettyCodeOptions: PrettyCodeOptions = {
   keepBackground: false,
   theme: JSON.parse(
@@ -35,4 +37,13 @@ export default defineConfig({
     analytics: true,
     imageService: true,
   }),
+  vite: {
+    plugins: [
+      Icons({
+        compiler: "jsx",
+        jsx: "preact",
+        autoInstall: true,
+      }),
+    ],
+  },
 });

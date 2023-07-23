@@ -1,0 +1,12 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import SeriesList from "@/components/series/SeriesList.astro";
+
+const series = await getCollection("series");
+---
+
+<Layout title="All series">
+  <h1 class="text-black dark:text-white pb-10 text-4xl">All Series</h1>
+  <SeriesList series={series} />
+</Layout>

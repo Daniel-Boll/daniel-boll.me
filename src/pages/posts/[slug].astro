@@ -20,9 +20,6 @@ type Props = {
   readingTime: string;
 } & Post;
 
-// const posts = await getCollection("posts");
-// console.log(posts);
-
 const { 
   data: {
     title, 
@@ -33,6 +30,7 @@ const {
   }, 
   render,
 } = Astro.props;
+
 const { Content, remarkPluginFrontmatter: { readingTime } } = await render();
 ---
 

@@ -17,6 +17,7 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ["Open Sans", ...defaultTheme.fontFamily.sans],
+        iosevka: ["Iosevka", ...defaultTheme.fontFamily.mono],
       },
       colors: {
         primary: {
