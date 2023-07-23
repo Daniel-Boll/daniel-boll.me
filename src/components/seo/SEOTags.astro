@@ -17,7 +17,7 @@ type Props = {
 
 const { title, description, noindex, og } = Astro.props;
 
-const DEFAULT_TITLE_PAGE = "Daniel Boll | ";
+const DEFAULT_TITLE_PAGE = "Daniel Boll";
 const DEFAULT_DESCRIPTION_PAGE =
   "I'm a full-stack developer from Brazil. I love to create technology and use it to make people's lives easier.";
 const DEFAULT_URL_SITE = SITE_URL;
@@ -53,7 +53,7 @@ const openGraph = {
     }}
     extend={{
       link: [
-        { rel: "icon", href: "/favicon.svg" },
+        { rel: "icon", href: "/favicon.ico" },
         { rel: "sitemap", href: "/sitemap-index.xml" },
       ],
       meta: [

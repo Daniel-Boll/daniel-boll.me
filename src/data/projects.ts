@@ -20,18 +20,19 @@ const projects: Project[] = [
     title: "Foliage Recognition",
     techs: ["Python", "Scikit-Learn", "OpenCV"],
     link: "https://github.com/Daniel-Boll/foliage-finder",
-    isComingSoon: true,
+    isComingSoon: false,
   },
   {
     title: "Packet Racers",
     techs: ["Rust", "Tokyo", "Socket"],
     link: "https://github.com/packet-racers/cli",
   },
-].sort((a, b) => a.title.localeCompare(b.title))
-.sort((a, b) => {
-  if (a.isComingSoon && !b.isComingSoon) return 1;
-  if (!a.isComingSoon && b.isComingSoon) return -1;
-  return 0;
-});
+]
+  .sort((a, b) => a.title.localeCompare(b.title))
+  .sort((a, b) => {
+    if (a.isComingSoon && !b.isComingSoon) return 1;
+    if (!a.isComingSoon && b.isComingSoon) return -1;
+    return 0;
+  });
 
 export default projects;

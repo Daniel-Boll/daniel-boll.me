@@ -1,0 +1,14 @@
+---
+import type { CollectionEntry } from "astro:content";
+import PostCard from "@/components/post/PostCard.astro";
+
+export interface Props {
+  posts: CollectionEntry<"posts">[];
+}
+
+const { posts } = Astro.props;
+---
+
+<article class="flex flex-col gap-4">
+  {posts.map((post) => (<PostCard post={post} />))}
+</article>
