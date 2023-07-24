@@ -26,7 +26,15 @@ export default defineConfig({
   experimental: {
     assets: true,
   },
-  integrations: [mdx(), tailwind(), sitemap(), prefetch(), preact()],
+  integrations: [
+    mdx(),
+    tailwind(),
+    sitemap(),
+    prefetch(),
+    preact({
+      compat: true,
+    }),
+  ],
   markdown: {
     syntaxHighlight: false,
     rehypePlugins: [[rehypePrettyCode, prettyCodeOptions]],
