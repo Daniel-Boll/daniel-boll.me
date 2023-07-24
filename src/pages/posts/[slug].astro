@@ -4,6 +4,7 @@ import { Image } from "astro:assets";
 
 import Layout from "@/layouts/Layout.astro";
 import formatDate from "@/utils/formatDate";
+import CommentSection from "@/components/post/Utterances.astro";
 
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
@@ -53,5 +54,7 @@ const { Content, remarkPluginFrontmatter: { readingTime } } = await render();
     </header>
 
     <Content />
+
+    <CommentSection />
   </main>
 </Layout>

@@ -1,18 +1,29 @@
 ---
-import Link from "./shared/Link.astro";
-import presentation from "@/data/presentation";
+import ButtonLink from "./shared/ButtonLink.astro";
+
+import MdiTwitter from "~icons/mdi/twitter";
+import MdiGithub from "~icons/mdi/github";
+import MdiThreads from "~icons/simple-icons/threads";
+
 ---
 
 <ul role="list" class="flex flex-row gap-2">
-  {
-    presentation.socials.map((social, index) => (
-      <>
-        <li>
-          <Link href={social.link} label={social.label} />
-        </li>
-
-        {presentation.socials.length - 1 !== index && <li>/</li>}
-      </>
-    ))
-  }
+  <li>
+    <ButtonLink href="https://github.com/daniel-boll">
+      <MdiGithub />
+      <span>Github</span>
+    </ButtonLink>
+  </li>
+  <li>
+    <ButtonLink href="https://twitter.com/db_regret">
+      <MdiTwitter />
+      <span>Twitter</span>
+    </ButtonLink>
+  </li>
+  <li>
+    <ButtonLink href="https://www.threads.net/@damnboy_bot">
+      <MdiThreads />
+      <span>Threads</span>
+    </ButtonLink>
+  </li>
 </ul>

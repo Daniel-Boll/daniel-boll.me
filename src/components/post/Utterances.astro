@@ -1,0 +1,19 @@
+<div id="utterances-container"></div>
+
+<script>
+  const script = document.createElement("script");
+  const container = document.querySelector("#utterances-container");
+
+  Object.entries({
+    src: "https://utteranc.es/client.js",
+    repo: "Daniel-Boll/daniel-boll.me",
+    "issue-term": "pathname",
+    label: "✨💬✨",
+    theme: "dark-blue",
+    crossorigin: "anonymous",
+  }).forEach(([key, value]) => {
+    script.setAttribute(key, value);
+  });
+
+  container?.appendChild(script);
+</script>
