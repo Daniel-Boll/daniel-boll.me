@@ -32,10 +32,32 @@ const {
   render,
 } = Astro.props;
 
+
+export const getOgImagePath = (filename: string = "Default Value") => {
+  if (filename.startsWith("/")) filename = filename.substring(1);
+
+  if (filename.endsWith("/"))
+    filename = filename.substring(0, filename.length - 1);
+
+  if (filename === "") filename = "Default Value";
+
+  return `./open-graph/${filename}.png`;
+};
+
+const ogImage = new URL(getOgImagePath(Astro.url.pathname), Astro.url.origin)
+  .href;
+
 const { Content, remarkPluginFrontmatter: { readingTime } } = await render();
+
+
+const og = {
+  title: title,
+  description: description,
+  image: ogImage,
+}
 ---
 
-<Layout title={title}>
+<Layout title={title} og={og}>
   <main class="post mx-auto flex w-full min-w-prose flex-col gap-4">
 
     <div class="md:flex space-x-10">
@@ -53,7 +75,9 @@ const { Content, remarkPluginFrontmatter: { readingTime } } = await render();
       <p class="text-sm text-gray-500">{readingTime}</p>
     </header>
 
-    <Content />
+    <div class="post mx-auto flex w-full min-w-prose flex-col gap-4 slide-enter-content">
+      <Content />
+    </div>
 
     <CommentSection />
   </main>

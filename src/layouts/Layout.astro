@@ -10,14 +10,21 @@ import "@/styles/post.css";
 
 export interface Props {
   title?: string;
+  og?: {
+    title?: string;
+    type?: string;
+    description?: string;
+    image?: string;
+    alt?: string;
+  };
 }
 
-const { title } = Astro.props;
+const { title, og } = Astro.props;
 ---
 
 <!DOCTYPE html>
 <html lang="en">
-  <SEOTags title={title} />
+  <SEOTags title={title} og={og} />
 
   <body
     class="mx-auto flex min-h-screen max-w-[872px] flex-col gap-9 bg-neutral-950 px-10 py-8 text-sm text-neutral-400 md:gap-20 md:py-16"

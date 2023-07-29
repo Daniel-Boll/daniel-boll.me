@@ -7,11 +7,11 @@ type Props = {
   description?: string;
   noindex?: boolean;
   og?: {
-    title: string;
-    type: string;
-    description: string;
-    image: string;
-    alt: string;
+    title?: string;
+    type?: string;
+    description?: string;
+    image?: string;
+    alt?: string;
   };
 };
 
@@ -23,20 +23,20 @@ const DEFAULT_DESCRIPTION_PAGE =
 const DEFAULT_URL_SITE = SITE_URL;
 
 const openGraph = {
-  title: og?.title || DEFAULT_TITLE_PAGE,
+  title: og?.title || title || DEFAULT_TITLE_PAGE,
   type: og?.type || "website",
   image: og?.image || "/opengraph-image.png",
   alt: og?.alt || "Daniel Boll",
   url: DEFAULT_URL_SITE,
-  description: og?.description || DEFAULT_DESCRIPTION_PAGE,
+  description: og?.description || description || DEFAULT_DESCRIPTION_PAGE,
 };
 ---
 
 <head>
   <SEO
     charset="UTF-8"
-    title={title || DEFAULT_TITLE_PAGE}
-    description={description || DEFAULT_DESCRIPTION_PAGE}
+    title={openGraph.title}
+    description={openGraph.description}
     noindex={noindex || false}
     openGraph={{
       basic: {

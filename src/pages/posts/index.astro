@@ -7,7 +7,7 @@ const posts = await getCollection("posts");
 ---
 
 <Layout title="All Posts">
-  <main class="flex flex-col gap-20">
+  <main class="flex flex-col gap-20 slide-enter-content">
     <h1 class="text-2xl text-neutral-100">Posts</h1>
     <PostsLists posts={posts} />
   </main>

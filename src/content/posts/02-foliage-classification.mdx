@@ -5,14 +5,19 @@ description: "Foliage Classification Machine Learning with manual feature extrac
 slug: "foliage-classification"
 ---
 
-import Interlocutor from "@/components/mdx/Interlocutor.astro";
+import Trivia from "@/components/mdx/Trivia.astro";
+import Caption from "@/components/mdx/Caption.astro";
 
 import { Image } from "astro:assets";
-import theDatasetImage from "../../assets/posts/02/the_dataset.jpg";
 
-<Interlocutor emoji="🚧">
+import theDatasetImage from "../../assets/posts/02/the_dataset.jpg";
+import prePrunedImages from "../../assets/posts/02/pre-pruned.png";
+import prunedImages from "../../assets/posts/02/pruned.png";
+import labeledImages from "../../assets/posts/02/labeled.png";
+
+<Trivia emoji="🚧">
   This post is a work in progress. It's not finished yet, but I'm working on it. Stay tuned!
-</Interlocutor>
+</Trivia>
 
 > In my Digital Image Processing course, we were tasked with a challenging project. The goal was to create a system capable of analyzing images of six different plant species. The system had to be trained using a dataset of 36 images, and once trained, it should be able to analyze all images in a specified folder. The final output of the system was to generate a comprehensive report containing information about each analyzed image, including the name of the image file. In the following sections, I will detail how I approached and solved this problem.
 
@@ -70,9 +75,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 We used the official Tensorflow image as our base and installed some additional packages that we needed. We also copied our local directory content into the docker image and installed the necessary Python packages from our requirements.txt file.
 
-<Interlocutor emoji="🤠">
+<Trivia emoji="🤠">
   At the start, our project was without a _requirements.txt_, the lifeline of Python dependencies. An attempt to create one with pip freeze fell flat _(image analysis can be picky!)_. So, we found ourselves manually jotting down dependencies as we progressed. Ah, the joy of unexpected surprises in coding! Should have used **Poetry**.
-</Interlocutor>
+</Trivia>
 
 To manage our Docker environment more easily, we used Docker Compose. Here's the docker-compose.yml file we used:
 
@@ -114,6 +119,180 @@ drun: clean ## Run the code within the docker
 	python src/main.py
 ```
 
-<Interlocutor emoji="🤤">
+<Trivia emoji="🤤">
   Sweet **AWK** juice to make a automatic `help` message in Make.
-</Interlocutor>
+</Trivia>
+
+## Pruning the Dataset: Separating the Leaves
+
+After setting up our environment and sorting out our dependencies, it was time to roll up our sleeves and start the real work. The first major task? Implementing the leaf extraction.
+
+The goal here was to segment the leaves in the images, isolate them from each other, and then save them separately for further analysis. This process is crucial, as it ensures our machine learning model can focus on individual leaves, rather than being confused by a bunch of overlapping leaves.
+
+
+```python title="src/image_processing/extract_leaves.py" {5-7}
+import os
+import cv2
+import numpy as np
+
+def extract_leaves(image_path, output_folder):
+    os.makedirs(output_folder, exist_ok=True)
+    min_area_threshold = 100
+```
+
+Our function ```extract_leaves{:python}``` takes two arguments: the path to the image file and the output folder to save extracted leaves. The ```os.makedirs(output_folder, exist_ok=True){:python}``` line ensures the output folder is created if it doesn't exist. We also set a minimum area threshold to ignore any small areas that could be noise.
+
+```python title="src/image_processing/extract_leaves.py" {5-6}
+def extract_leaves(image_path, output_folder):
+    os.makedirs(output_folder, exist_ok=True)
+    min_area_threshold = 100
+
+    img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+    channels = cv2.split(img)
+```
+
+We load the image using ```cv2.imread{:python}``` with the flag ```cv2.IMREAD_UNCHANGED{:python}``` to preserve transparency information. Then, we split the image into its channels (Red, Green, Blue, Alpha) using ```cv2.split{:python}```.
+
+```python title="src/image_processing/extract_leaves.py" {8}
+def extract_leaves(image_path, output_folder):
+    os.makedirs(output_folder, exist_ok=True)
+    min_area_threshold = 100
+
+    img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+    channels = cv2.split(img)
+
+    _, mask = cv2.threshold(channels[3], 1, 255, cv2.THRESH_BINARY)
+```
+
+We create a mask by thresholding the alpha channel (the 4th channel in our image). The cv2.threshold function sets all pixel values greater than 1 to 255 (white), creating a binary image where the leaves are white and the background is black.
+
+```python title="src/image_processing/extract_leaves.py" {10}
+def extract_leaves(image_path, output_folder):
+    os.makedirs(output_folder, exist_ok=True)
+    min_area_threshold = 100
+
+    img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+    channels = cv2.split(img)
+
+    _, mask = cv2.threshold(channels[3], 1, 255, cv2.THRESH_BINARY)
+
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+```
+
+Then, we find the contours (outlines) of all objects in the mask using the cv2.findContours function. This gives us a list of contours, each representing a leaf in the image.
+
+```python title="src/image_processing/extract_leaves.py" {8-11}
+    img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+    channels = cv2.split(img)
+
+    _, mask = cv2.threshold(channels[3], 1, 255, cv2.THRESH_BINARY)
+
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    for i, contour in enumerate(contours):
+        area = cv2.contourArea(contour)
+        if area < min_area_threshold:
+            continue
+```
+
+We loop through each contour and calculate its area using cv2.contourArea. If the area is smaller than our set threshold, we skip the contour. This helps us ignore small noises or artifacts in the image.
+
+
+```python title="src/image_processing/extract_leaves.py" {6-8}
+    for i, contour in enumerate(contours):
+        area = cv2.contourArea(contour)
+        if area < min_area_threshold:
+            continue
+
+        contour_mask = np.zeros_like(mask)
+        cv2.drawContours(contour_mask, [contour], 0, 255, -1)
+        object_img = cv2.bitwise_and(img, img, mask=contour_mask)
+```
+
+For each valid contour, we create a blank mask and draw the contour on it using cv2.drawContours. This gives us a mask where only the current leaf is white. We then perform a bitwise-and operation on the original image and the mask, effectively isolating the leaf in the image.
+
+```python title="src/image_processing/extract_leaves.py" {10-13}
+    for i, contour in enumerate(contours):
+        area = cv2.contourArea(contour)
+        if area < min_area_threshold:
+            continue
+
+        contour_mask = np.zeros_like(mask)
+        cv2.drawContours(contour_mask, [contour], 0, 255, -1)
+        object_img = cv2.bitwise_and(img, img, mask=contour_mask)
+
+        image_file = os.path.basename(image_path)
+        object_name = f"{os.path.splitext(image_file)[0]}_{i}.png"
+        output_path = os.path.join(output_folder, object_name)
+        cv2.imwrite(output_path, object_img)
+```
+
+Finally, we save each isolated leaf as a separate image in our output folder. We generate the output file name based on the original image's name and the index of the contour, ensuring each leaf gets a unique name.
+
+This function was key to preparing our dataset for further processing. 
+
+| Pre-pruned images | Pruned images |
+| :---: | :---: |
+| <Image src={prePrunedImages} alt="Pre-pruned images" class="md:w-1/2 md:h-1/2 self-center" /> | <Image src={prunedImages} alt="Pruned images" class="md:w-1/2 md:h-1/2 self-center" /> |
+| <Caption index="2" caption="Originally the images contained multiple leaves. We used the extract_leaves function to isolate each leaf into its own image." /> | <Caption index="3" caption="After pruning, each image contains only one leaf." /> |
+
+### Good Ol' Manual Labeling: A Sip of Coffee and a LOT of Patience
+
+Once we extracted the individual leaves from each image, we had another challenge to tackle - labeling. You'd think we had some complex, fancy-pants algorithm do the job, right? Well, not really!
+
+We simply labeled each leaf by eye and hand, old-school style. Yep, that's right! It's like playing 'spot the differences', only with leaves and, trust me, they aren't as different as you'd hope. Every leaf took a sip of coffee and a squinty-eyed look, backed up by some educated guesses (and prayers).
+
+A little bit of drudgery? Absolutely. But hey, nothing says 'hands-on data science' quite like manually labelling hundreds of leaf images while nursing a caffeine overdose. So, a toast to the unsung hero of any machine learning project - the humble manual labeler! (The things we do for love... and accuracy).
+
+Remember folks, machine learning isn't all glamorous algorithms and fancy models. Sometimes, it's about slogging through leaf pictures while questioning your life choices.
+
+<Image src={labeledImages} alt="Labeling" class="md:w-1/2 md:h-1/2 self-center" />
+<Caption index="4" caption="The labeling process was a little tedious, but it was worth it in the end." />
+
+## Feature Extraction: The 'What's What' of Leaves
+
+With our leaves neatly isolated, we moved on to the critical step of feature extraction. Here's a look at the code that performed this task:
+
+```python title="src/feature_extraction/__init__.py" {5-7}
+def extract_feature(image_path, step=Step.TRAIN):
+    features = {}
+
+    # Get the original contours and extract features
+    contours = image.get_contours(image_path)
+    features[image_path] = extract_features_from_contours(
+        contours, image_path, step)
+
+    return features
+```
+
+In our ```extract_feature{:python}``` function, we find the leaf contours and then extract the features from these contours. The extracted features are stored in a dictionary using the image path as the key.
+
+```python title="src/feature_extraction/__init__.py" {4-7,11-15} /class/#i /TRAIN/#i
+def extract_features_from_contours(contours, image_path, step):
+    contour_features = []
+
+    freeman_features = freeman_chain_code.extract_features(contours)
+    statistical_features = statistics.extract_features(contours)
+    local_binary_pattern_features = local_binary_pattern.extract_features(
+        contours, image_path)
+
+    for freeman_feature, statistical_feature in zip(freeman_features,
+                                                    statistical_features):
+        feature = {
+            "chain_code": freeman_feature,
+            "lbp": local_binary_pattern_features,
+            **statistical_feature,
+        }
+
+        if step == Step.TRAIN:
+            name = image_path.split("/")[1]
+            feature["class"] = name
+
+        contour_features.append(feature)
+
+    return contour_features
+```
+
+<Trivia emoji="🌿">
+As we can see only when we are training the model we do know the classes.
+</Trivia>
