@@ -1,0 +1,65 @@
+---
+title: "A first project with ExpressoTS"
+publishedAt: 2023-07-31
+description: "The Developer-Friendly TypeScript Framework for Server-Side Applications"
+slug: "a-first-project-with-expressots"
+---
+
+import Trivia from "@/components/mdx/Trivia.astro";
+
+<Trivia emoji="🚧">
+  This post is a work in progress. It's not finished yet, but I'm working on it. Stay tuned!
+</Trivia>
+
+## Introduction
+
+[ExpressoTS](https://expresso-ts.com/) is a new developer-friendly TypeScript framework for Server-Side Applications. It's currently built on top of [Express](https://expressjs.com/), easy to get a new developer on board, light and easy project structure, two different project structure supported (opinionated and non opinionated version), supports MVC, non MVC, architecture. The opinionated template was built on top of clean architecture, you will see concepts embedded in the opinionated template such as entities, useCases, repositories and providers.
+
+<Trivia emoji="🐎">
+  The logo correctly indicates the speed of the framework.
+</Trivia>
+
+## Exploring the opinionated template
+
+First, let's take a look into the code that they show us in the first page of the website.
+
+```typescript title="app.usecase.ts" {3,5}
+import { provide } from "inversify-binding-decorators";
+
+@provide(AppUseCase)
+class AppUseCase {
+  execute() {
+    return "Hello Dev!";
+  }
+}
+
+export { AppUseCase };
+```
+
+The use case as the docs suggests _"describes a specific scenario or flow of events between the actors and the system, leading to a certain outcome."_
+
+```typescript title="app.controller.ts" {6,12} /execute/#i
+import { Response } from "express";
+import { controller, httpGet, response } from "inversify-express-utils";
+import { AppUseCase } from "./app.usecase";
+import { BaseController, Report, StatusCode } from "@expressots/core";
+
+@controller("/")
+class AppController extends BaseController {
+  constructor(private appUseCase: AppUseCase) {
+    super("app-controller");
+  }
+
+  @httpGet("/")
+  execute(@response() res: Response) {
+    return this.callUseRenderAsync(res, "index", {
+      layout: "layout",
+      message: this.appUseCase.execute(),
+    });
+  }
+}
+
+export { AppController };
+```
+
+Note the execute call from the useCase is being called from the controller, this is a good practice to keep the controller as thin as possible.
