@@ -31,7 +31,7 @@ export const OpenGraphTemplate = ({ title, description, date }: OgData) => (
         color: "white",
         alignSelf: "center",
         margin: 0,
-        fontSize: ""
+        fontSize: "",
       }}
     >
       {title}

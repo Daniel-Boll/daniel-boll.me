@@ -15,7 +15,7 @@ const posts = await getCollection("posts");
 ---
 
 <Layout>
-  <main class="flex flex-col gap-20 slide-enter-content">
+  <main class="slide-enter-content flex flex-col gap-20">
     <article class="flex flex-col gap-8">
       <header>
         <h1 class="text-3xl text-neutral-100">{presentation.title}</h1>
@@ -44,7 +44,6 @@ const posts = await getCollection("posts");
       </section>
     </article>
 
-
     <article class="flex flex-col gap-8">
       <header class="flex w-full flex-row justify-between gap-2">
         <h3 class="text-lg text-neutral-100">Latest posts</h3>
@@ -56,7 +55,7 @@ const posts = await getCollection("posts");
         {
           posts.length !== 0 &&
             posts
-              .slice(0, 2)
+              .slice(0, 4)
               .map((post) => (
                 <FeaturedPostCard
                   publishedAt={post.data.publishedAt}

@@ -25,6 +25,7 @@ export default defineConfig({
   site: SITE_URL,
   experimental: {
     assets: true,
+    viewTransitions: true,
   },
   integrations: [
     mdx(),
