@@ -306,3 +306,100 @@ def extract_features_from_contours(contours, image_path, step):
 <Trivia emoji="🌿">
   As we can see only when we are training the model we do know the classes.
 </Trivia>
+
+## Feature Serialization: Storing the Leafy Knowledge 
+
+Once we have successfully extracted the critical features from our leaf dataset, the next step is to serialize and store this data. Serializing our dataset converts it into a format that can be easily saved to disk and subsequently loaded back when needed. For this purpose, we use a powerful Python library known as `joblib`.
+
+Here's a simple piece of code demonstrating how we've done this:
+
+```python title="src/image_processing/__init__.py" {3-4,6-7}
+from joblib import dump, load
+
+def save_features(features):
+    dump(features, "features.pkl")
+
+def load_features():
+    return load("features.pkl")
+```
+
+And just like that, our feature extraction process is complete! We've successfully isolated our leaves, extracted meaningful features from them, and stored these features for future use.
+
+
+## Model Training: Teaching our AI to Understand Leaves
+
+So, you've followed us through leaf isolation and feature extraction, and we've managed to store all this data in a convenient format. But what next? Here comes the exciting part – training our model! In this section, we'll get our hands dirty with some real machine learning using a type of network known as a Multi-Layer Perceptron (MLP).
+
+Let's walk through the code that does the magic:
+
+```python title="src/classifier/mlp.py"
+import numpy as np
+
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import StandardScaler
+
+def train(features):
+    X = []
+    y = []
+
+    # Extract the features and their respective classes
+    for _, v in features.items():
+        for d in v:
+            for i in range(len(d["extent"])):
+                feature = [
+                    d["aspect_ratio"][i],
+                    d["eccentricity"][i],
+                    d["extent"][i],
+                    d["solidity"][i],
+                    *d["hu_moments"][i],
+                    *d["lbp"][i],
+                ]
+
+                X.append(feature)
+                y.append(d["class"])
+
+    # Convert the lists to numpy arrays
+    X = np.array(X)
+    y = np.array(y)
+
+    # Scale your data
+    scaler = StandardScaler()
+    X = scaler.fit_transform(X)
+
+    # Split into train and test sets
+    X_train, X_test, y_train, y_test = train_test_split(
+        X,
+        y,
+        test_size=0.3,
+        random_state=42,
+        stratify=y,
+    )
+
+    # Create the MLP classifier
+    mlp = MLPClassifier(hidden_layer_sizes=(100, 100),
+                        max_iter=200,
+                        verbose=True)
+
+    # Fit the model
+    mlp.fit(X_train, y_train)
+
+    # Save the model
+    dump(mlp, "model.pkl")
+```
+
+Now, I understand that it might not be the prettiest code you've ever seen. But hey _"if it looks stupid but it works, it ain't stupid!"_.
+
+This function, aptly named train, takes in our pre-processed features as input. It prepares the data, scales it, splits it into training and testing sets, and then trains our MLP model. Finally, the trained model is saved to the disk for future use.
+
+The model training process involves a few steps:
+
+- We first construct our feature matrix X and target vector y.
+- The feature data is then standardized to ensure that our MLP isn't swayed unduly by features that naturally have larger values.
+- Our data is split into a training set to teach our model and a test set to verify its performance. We're reserving 30% of the data for testing purposes.
+- An MLPClassifier object is then initialized with two hidden layers, each having 100 neurons. The training process is carried out over 200 iterations (epochs).
+- The model is then trained using the fit method, and we finally save our trained model to a file named model.pkl for future use.
+
+<Trivia emoji="🚜">
+  The beauty of coding isn't just about creating intricate and aesthetically pleasing lines of code. It's about getting the job done, and our humble piece of training code does just that – efficiently, and effectively!
+</Trivia>
