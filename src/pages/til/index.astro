@@ -1,0 +1,14 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import TilsLists from "@/components/til/TilList.astro";
+
+const tils = await getCollection("tils");
+---
+
+<Layout title="All tils">
+  <main class="flex flex-col gap-8 slide-enter-content">
+    <h1 class="text-2xl text-neutral-100 font-sans leading-8">til</h1>
+    <TilsLists tils={tils} />
+  </main>
+</Layout>
