@@ -40,6 +40,16 @@ const notInHome = pathname !== "/";
           }}>Posts</a
         >
       </li>
+      <li>/</li>
+      <li>
+        <a
+          href="/til"
+          class:list={{
+            ["hover:text-neutral-100"]: true,
+            ["text-neutral-100"]: pathname === "/til",
+          }}>TIL</a
+        >
+      </li>
     </ul>
   </nav>
 </header>

@@ -1,0 +1,14 @@
+---
+import type { CollectionEntry } from "astro:content";
+import TilCard from "@/components/til/TilCard.astro";
+
+export interface Props {
+  tils: CollectionEntry<"tils">[];
+}
+
+const { tils } = Astro.props;
+---
+
+<article class="flex flex-col gap-4">
+  {tils.map((til) => (<TilCard til={til} />))}
+</article>
