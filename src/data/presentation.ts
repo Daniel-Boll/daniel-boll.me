@@ -14,7 +14,7 @@ const presentation: Presentation = {
   mail: "danielboll.dev@proton.me",
   title: "Hi, I’m <Daniel::Boll> 👋",
   description:
-    "*Salve!* I'm a full-stack developer from Brazil. I'm passionate about technology and constantly seeking new challenges to expand my skillset. I enjoy mastering new programming languages and frameworks and contributing to open source projects. I also like sharing my progress through live coding.",
+    "*Salve!* I'm a Tech Lead from Brazil. I'm passionate about technology and constantly seeking new challenges to expand my skillset. I enjoy mastering new programming languages and frameworks and contributing to open source projects. I also like sharing my progress through live coding.",
   socials: [
     {
       label: "Twitter",

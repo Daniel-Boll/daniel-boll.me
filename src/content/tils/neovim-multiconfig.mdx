@@ -1,0 +1,38 @@
+---
+title: "Neovim multiconfig"
+publishedAt: 2023-08-23
+slug: "til-neovim-multiconfig"
+tags: ["neovim", "configs", "ricing"]
+---
+
+Managing multiple Neovim configurations is something I always find myself diving into. As someone who loves to experiment with different setups, I've been through a journey of trying to find the most convenient way to manage them all. I used to rely on [cheovim](https://github.com/NTBBloodbath/cheovim), but I found the experience not as seamless as I wanted it to be.
+
+Enter the `NVIM_APPNAME` environment variable—a simple, fast, and incredibly straightforward approach to handle multiple Neovim configurations.
+
+With `NVIM_APPNAME`, you can control the directory Neovim looks for configuration files. Here's a practical example:
+
+```bash
+NVIM_APPNAME=nvim_personal nvim
+```
+
+This command will prompt Neovim to use a configuration located in `~/.config/nvim_personal`, making it act as the config folder for this particular instance.
+
+This mechanism leverages the XDG directory structure, allowing Neovim to look for (and auto-create) configurations within various XDG parent directories. If you set the `NVIM_APPNAME` variable to "neovim", Neovim will look for files in `$XDG_CONFIG_HOME/neovim` instead of the usual `$XDG_CONFIG_HOME/nvim`.
+
+Here's the context from Neovim's help documentation to further illustrate this point:
+
+```man
+NVIM_APPNAME					*$NVIM_APPNAME*
+The XDG directories used by Nvim can be further configured by setting the
+`$NVIM_APPNAME` environment variable. This variable controls the directory
+Neovim will look for (and auto-create) in the various XDG parent directories.
+For example, setting `$NVIM_APPNAME` to "neovim" before running Neovim will
+result in Neovim looking for configuration files in `$XDG_CONFIG_HOME/neovim`
+instead of `$XDG_CONFIG_HOME/nvim`.
+
+Note: Similarly to the $XDG environment variables, when
+`$XDG_CONFIG_HOME/nvim` is mentioned, it should be understood as
+`$XDG_CONFIG_HOME/$NVIM_APPNAME`.
+```
+
+In the end, the `NVIM_APPNAME` variable has allowed me to enjoy the process of experimenting with various configurations without the hassle. It's an elegant solution that aligns perfectly with my love for simplicity and efficiency.

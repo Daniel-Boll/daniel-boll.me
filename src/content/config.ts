@@ -19,6 +19,16 @@ const posts = defineCollection({
     }),
 });
 
+const tils = defineCollection({
+  type: "content",
+  schema: z.object({
+    title: z.string(),
+    tags: z.array(z.string()),
+    publishedAt: z.date(),
+    updatedAt: z.date().optional(),
+  }),
+});
+
 const series = defineCollection({
   schema: z.object({
     id: z.string(),
@@ -28,4 +38,4 @@ const series = defineCollection({
   }),
 });
 
-export const collections = { posts, series };
+export const collections = { posts, series, tils };
