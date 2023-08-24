@@ -14,11 +14,7 @@ import theDatasetImage from "../../assets/posts/02/the_dataset.jpg";
 import prePrunedImages from "../../assets/posts/02/pre-pruned.png";
 import prunedImages from "../../assets/posts/02/pruned.png";
 import labeledImages from "../../assets/posts/02/labeled.png";
-
-<Trivia emoji="🚧">
-  This post is a work in progress. It's not finished yet, but I'm working on it.
-  Stay tuned!
-</Trivia>
+import finalImage from "../../assets/posts/02/final.png";
 
 > In my Digital Image Processing course, we were tasked with a challenging project. The goal was to create a system capable of analyzing images of six different plant species. The system had to be trained using a dataset of 36 images, and once trained, it should be able to analyze all images in a specified folder. The final output of the system was to generate a comprehensive report containing information about each analyzed image, including the name of the image file. In the following sections, I will detail how I approached and solved this problem.
 
@@ -403,3 +399,113 @@ The model training process involves a few steps:
 <Trivia emoji="🚜">
   The beauty of coding isn't just about creating intricate and aesthetically pleasing lines of code. It's about getting the job done, and our humble piece of training code does just that – efficiently, and effectively!
 </Trivia>
+
+## Classification: Bringing the AI to Life with Labels
+
+The model training chapter has been a roller coaster, and now we have a trained model ready to unleash on leaf images. The next exciting chapter is about the classification, where our trained Multi-Layer Perceptron (MLP) takes in the processed features and recognizes the types of leaves.
+
+Here's how the magic unfolds:
+
+### Loading the Trained Model
+First, we load our previously saved MLP model from the disk.
+
+```python
+mlp = load("model.pkl")
+```
+
+### Preparing the Features
+We loop through the files, extract the features, and construct our feature matrix `X` just like we did in the training process.
+
+```python
+for file in files:
+    X = []
+    for d in features[file]:
+        lbp_feature = list(chain(*d["lbp"]))
+        feature = [
+            d["aspect_ratio"],
+            d["eccentricity"],
+            d["extent"],
+            d["solidity"],
+            *d["hu_moments"],
+            *lbp_feature,
+        ]
+        X.append(feature)
+
+    # Convert the lists to numpy arrays
+    X = np.array(X)
+```
+
+### Scaling and Prediction
+The features are then standardized, and the MLP model predicts the classes along with the probabilities for each class.
+
+```python
+# Scale your data
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+# Predict the classes
+predictions = mlp.predict(X)
+probabilities = mlp.predict_proba(X)
+```
+
+### Labeling the Images
+The predictions and probabilities are then used to annotate the original images with labels. The bounding rectangles and labels are drawn on the images.
+
+```python
+image = cv2.imread(file)
+probability_of_class = np.max(probabilities, axis=1)
+
+for i, leaf_features in enumerate(features[file]):
+    # Get the bounding rectangle and calculate the label positions
+    # Draw the text labels and percentage labels on the image
+    print(f"Label: {predictions[i]} with probability {probability_of_class[i]}")
+
+    print("Features:")
+    leaf_contour = leaf_features["contours"][i]
+
+    # Get the bounding rectangle
+    x, y, w, h = cv2.boundingRect(leaf_contour)
+
+    # Calculate the center of the rectangle
+    class_label = (x + w // 2, y + h // 2)
+    percentage_label = (x + w // 2, y + h // 2 + 40)
+
+    # Draw the text label on the image
+    cv2.putText(
+        image,
+        str(predictions[i]),
+        class_label,
+        cv2.FONT_HERSHEY_SIMPLEX,
+        1,
+        (0, 255, 0),
+        2,
+    )
+
+    # Draw the percentage label on the image
+    cv2.putText(
+        image,
+        f"{probability_of_class[i] * 100:.2f}%",
+        percentage_label,
+        cv2.FONT_HERSHEY_SIMPLEX,
+        1,
+        (255, 255, 0),
+        2,
+    )
+
+# Save the classified image
+cv2.imwrite("classified/" + file.split("/")[-1], image)
+```
+
+The result is an image where each leaf is labeled with its corresponding class and confidence score.
+
+<Trivia emoji="🍃">
+  The classification step is where the AI showcases its intelligence, turning raw data into insights. It is the final piece that completes the puzzle, letting us see the leaves through the lens of our intelligent algorithm.
+</Trivia>
+
+<Image
+  src={finalImage}
+  alt="A image from the dataset"
+  class="self-center md:h-1/2 md:w-1/2"
+/>
+
+This brings us to the end of our AI journey to understand leaves. We've learned about preprocessing, feature extraction, model training, and classification. Now you have a full-fledged system capable of recognizing and labeling different types of leaves. Happy leaf hunting! 🍁
