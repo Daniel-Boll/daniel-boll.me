@@ -3,7 +3,10 @@ import { getCollection } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import TilsLists from "@/components/til/TilList.astro";
 
-const tils = await getCollection("tils");
+const tils = (await getCollection("tils"))
+  // Order by newest, `data.publishedAt` is a Date object
+  // @ts-ignore
+  .sort((a, b) => b.data.publishedAt - a.data.publishedAt)
 ---
 
 <Layout title="All tils">

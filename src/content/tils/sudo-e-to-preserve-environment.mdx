@@ -1,0 +1,20 @@
+---
+title: "Using `sudo -E` to Preserve Environment Variables in Bash"
+publishedAt: 2023-08-24
+slug: "til-using-sudo-e-to-preserve-environment-variables-in-bash"
+tags: ["bash", "shell", "sudo"]
+---
+
+Somewhere last year, I learned about the ```sudo -E{:bash}``` command in bash, which allows you to run a command with root privileges while preserving the user's environment variables. This can be extremely useful when you want to open a file with elevated permissions but still retain your user-specific settings and environment.
+
+### Example:
+
+Imagine you want to open a Neovim configuration file that requires administrative access, and you want to make sure that all your environment variables are still accessible. Here's how you can do that:
+
+```bash
+sudo -E nvim /etc/nginx/conf.d/*.conf
+# This will open the configuration files in Neovim with sudo permissions
+# while keeping your current environment variables intact.
+```
+
+This way, you don't lose your customized settings and environment preferences when running commands that require elevated permissions. The `sudo -E` command is a valuable tool for maintaining consistency and ease of use when working with system-level files and configurations!
