@@ -114,6 +114,10 @@ pre > code {
   @apply !text-purple-200 bg-purple-800/50 border-b-purple-600 font-bold;
 }
 
+[data-chars-id="g"] {
+  @apply !text-green-300 bg-green-800/50 border-b-green-600 font-bold;
+}
+
 @keyframes slide-enter {
   0% {
     transform: translateY(10px);

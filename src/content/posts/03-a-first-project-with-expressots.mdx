@@ -7,11 +7,6 @@ slug: "a-first-project-with-expressots"
 
 import Trivia from "@/components/mdx/Trivia.astro";
 
-<Trivia emoji="🚧">
-  This post is a work in progress. It's not finished yet, but I'm working on it.
-  Stay tuned!
-</Trivia>
-
 ## Introduction
 
 [ExpressoTS](https://expresso-ts.com/) is a new developer-friendly TypeScript framework for Server-Side Applications. It's currently built on top of [Express](https://expressjs.com/), easy to get a new developer on board, light and easy project structure, two different project structure supported (opinionated and non opinionated version), supports MVC, non MVC, architecture. The opinionated template was built on top of clean architecture, you will see concepts embedded in the opinionated template such as entities, useCases, repositories and providers.
@@ -20,30 +15,214 @@ import Trivia from "@/components/mdx/Trivia.astro";
   The logo correctly indicates the speed of the framework.
 </Trivia>
 
-## Exploring the opinionated template
+## Setting Up Your First ExpressoTS Project
 
-First, let's take a look into the code that they show us in the first page of the website.
+Ah, the first step to any great journey in the world of coding—a proper setup. Trust me, nobody wants to get lost before even starting the adventure. So, let's cut the chit-chat and dive right in.
 
-```typescript title="app.usecase.ts" {3,5}
-import { provide } from "inversify-binding-decorators";
+### Installation of ExpressoTS CLI
 
-@provide(AppUseCase)
-class AppUseCase {
-  execute() {
-    return "Hello Dev!";
-  }
-}
+You've got two routes here, and the destination is the same, a functional ExpressoTS environment. Your first option is to install the ExpressoTS CLI globally:
 
-export { AppUseCase };
+```bash title="terminal"
+pnpm i -g @expressots/cli
 ```
 
-The use case as the docs suggests _"describes a specific scenario or flow of events between the actors and the system, leading to a certain outcome."_
+Got limited commitment issues? No worries, you can also use `dlx` to run the CLI without installing it globally. Ah, the wonders of a one-night stand with a CLI!
 
-```typescript title="app.controller.ts" {6,12} /execute/#i
+```bash title="terminal"
+pnpx @expressots/cli new expressots-first-project
+```
+
+### Configuration Wizard
+
+After running the command, you're greeted by a friendly (albeit text-based) wizard 🧙‍♂️. 
+
+```bash title="terminal"
+[🐎 Expressots]
+
+? Project name expressots-first-project
+? Package manager pnpm
+? Select a template Non-Opinionated :: A simple ExpressoTS project.
+? Do you want to create this project? Yes
+```
+
+Fill out the form wisely but don't overthink it. For this tutorial, I'm going with the "Non-Opinionated" template because, it will give us a shallower learning curve in the start.
+
+## Getting Comfy in Your New ExpressoTS Home 🏡
+
+### Navigating to Your Project
+
+So you've set up your new ExpressoTS project. Awesome! Time to get inside the engine room and take a look under the hood.
+
+```bash title="terminal"
+cd expressots-first-project
+```
+
+You're now in the root folder, and if you're curious about what comes packed by default, run a quick ```tree{:bash}``` command.
+
+```bash title="terminal"
+@expressots/tests/expressots-first-project via  v16.19.0
+❯ tree -I node_modules -a
+.
+├── .eslintrc.js
+├── expressots.config.ts
+├── .gitignore
+├── jest.config.ts
+├── package.json
+├── pnpm-lock.yaml
+├── .prettierrc
+├── README.md
+├── src
+│   ├── app.container.ts
+│   ├── app.controller.ts
+│   ├── app.module.ts
+│   ├── app.usecase.ts
+│   └── main.ts
+├── test
+│   └── app.usecase.spec.ts
+├── tsconfig.build.json
+└── tsconfig.json
+
+3 directories, 16 files
+```
+
+There you go! These are the files you'll be living with.
+
+### Customizing Your Prettier Preferences
+
+You've got your own coding style—don't we all? You can tweak the `.prettierrc` file to your heart's content.
+
+```json title=".prettierrc"
+{
+  "singleQuote": false,
+  "trailingComma": "all",
+  "endOfLine": "auto",
+  "tabWidth": 2
+}
+```
+
+### Let's Take a Quick Tour of **package.json**
+
+A glance at the `scripts` section in `package.json` tells you all you need to know to get things up and running.
+
+```bash title="terminal"
+❯ cat package.json | jq ".scripts"
+{
+  "prebuild": "rm -rf ./dist",
+  "build": "tsc -p tsconfig.build.json",
+  "dev": "tsnd ./src/main.ts",
+  "prod": "node ./dist/main.js",
+  "test": "jest",
+  "test:watch": "jest --watchAll",
+  "test:cov": "jest --coverage",
+  "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+  "lint": "eslint \"src/**/*.ts\" --fix"
+}
+```
+
+Here, you've got your usual suspects: build, dev, test, and more.
+
+### Format All The Things!
+
+Before diving into development, let's keep it neat. The `format` script will handle that.
+
+```bash title="terminal"
+pnpm format
+```
+
+### Running in Dev Mode
+
+And finally, the moment you've been waiting for—fire up the dev server and see your app come to life!
+
+```bash title="terminal"
+@expressots/tests/expressots-first-project via  v16.19.0
+❯ pnpm dev
+
+[INFO] ts-node-dev ver. 2.0.0 (using ts-node ver. 10.9.1, typescript ver. 4.9.5)
+Application version not provided is running on port 3000 - Environment: development
+```
+
+## Making Your First Request in ExpressoTS 🌐
+
+### Time for a Little Hello!
+
+You've been through the house tour, you've feng shui'd your `.prettierrc` and got your scripts all figured out. Now what? Well, how about actually seeing your app in action?
+
+### Using HTTPie for Your First GET Request
+
+For this demonstration, we're going to use [HTTPie](https://httpie.io/) — the ```cURL{:bash}``` for the 21st century. But like, way more readable. Here's how to send your first GET request to `http://localhost:3000`.
+
+```bash title="terminal"
+@expressots/tests/expressots-first-project via  v16.19.0
+❯ http :3000
+```
+
+*Bam!* You should see a response like:
+
+```bash title="terminal"
+HTTP/1.1 200 OK
+...
+Hello Expresso TS!
+```
+
+**Congrats!** You just made your server say hello.
+
+## Anatomy of the "Hello Expresso TS!" 🦴
+
+Alright, let's dissect that ```"Hello Expresso TS!"{:json}``` message. How does this simple string pass through layers of TypeScript files to make it to your browser? Spoiler: _It's not magic; it's just well-structured code._
+
+### The Starting Point: **src/main.ts**
+
+This is where the baton is picked up. Here, we import the essential parts from ExpressoTS and set up the initial application instance. Simple enough.
+
+```ts title="src/main.ts"
+import "reflect-metadata";
+import { AppInstance, ServerEnvironment } from "@expressots/core";
+import { container } from "./app.container";
+
+async function bootstrap() {
+  AppInstance.create(container);
+  AppInstance.listen(3000, ServerEnvironment.Development);
+}
+
+bootstrap();
+```
+
+### The Container: **src/app.container.ts**
+
+Think of this as the backstage, where everyone gets ready for the show. It's where the application container is configured with your custom modules.
+
+```ts title="src/app.container.ts"
+import { AppContainer } from "@expressots/core";
+import { AppModule } from "./app.module";
+
+const appContainer = new AppContainer();
+const container = appContainer.create([AppModule]);
+
+export { container };
+```
+
+### The Module: **src/app.module.ts**
+
+Modules in ExpressoTS group related functionalities. Here, it's as simple as importing the `AppController`.
+
+```ts title="src/app.module.ts"
+import { CreateModule } from "@expressots/core";
+import { AppController } from "./app.controller";
+
+const AppModule = CreateModule([AppController]);
+
+export { AppModule };
+```
+
+### The Controller: **src/app.controller.ts**
+
+This is the conductor of our orchestra. It's responsible for handling HTTP requests and directing traffic. In this case, it's just saying, ```"Hello Expresso TS!"{:json}```.
+
+```ts title="src/app.controller.ts"
+import { BaseController, controller, httpGet, response } from "inversify-express-utils";
 import { Response } from "express";
-import { controller, httpGet, response } from "inversify-express-utils";
 import { AppUseCase } from "./app.usecase";
-import { BaseController, Report, StatusCode } from "@expressots/core";
 
 @controller("/")
 class AppController extends BaseController {
@@ -53,14 +232,334 @@ class AppController extends BaseController {
 
   @httpGet("/")
   execute(@response() res: Response) {
-    return this.callUseRenderAsync(res, "index", {
-      layout: "layout",
-      message: this.appUseCase.execute(),
-    });
+    return res.send(this.appUseCase.execute());
+  }
+}
+```
+
+### The Use Case: **src/app.usecase.ts**
+
+Here's where the actual ```"Hello Expresso TS!"{:json}``` lives.
+
+```ts title="src/app.usecase.ts" {6}
+import { provide } from "inversify-binding-decorators";
+
+@provide(AppUseCase)
+class AppUseCase {
+  execute() {
+    return "Hello Expresso TS!";
+  }
+}
+```
+
+## "Hello, Who?" Changing the Default Response 🖊️
+
+Got bored of the usual ```"Hello Expresso TS!"{:json}```? Let's give it a personal touch. To do that, we only need to venture into the `src/app.usecase.ts` file. See, this is the beauty of a well-structured codebase; you don't have to jump through hoops to make a simple change.
+
+### The Tweak: **src/app.usecase.ts**
+
+One line change. That's it. Here we just swap out the text to ```"Hello from <Daniel::Boll>"{:json}```.
+
+```ts title="src/app.usecase.ts" {4}
+@provide(AppUseCase)
+class AppUseCase {
+  execute() {
+    return "Hello from <Daniel::Boll>";
+  }
+}
+```
+
+### The Reload: Auto-refresh FTW
+
+As soon as you save that change, the development server detects this update and reloads itself. No manual effort required. Ah, the joys of modern development.
+
+```bash title="terminal"
+[INFO] Restarting: /../@expressots/tests/expressots-first-project/src/app.usecase.ts has been modified
+Application version not provided is running on port 3000 - Environment: development
+```
+
+### The Result: Let's Talk to the Server Again
+
+Run the command, and voila! The updated greeting is now served hot, right from your server.
+
+```bash title="terminal"
+Hello from <Daniel::Boll>
+```
+
+## Tuning Port via Environment Variables 🎛️
+
+Great, we're diving into environment-specific configuration! This makes the application flexible and easier to deploy in various environments.
+
+### Port Configuration in **src/main.ts**
+
+We modify the ```AppInstance.listen(){:ts}``` method to get the port from the environment variable `PORT`. If `PORT` is not available, it defaults to ```3000{:ts}```.
+
+```ts title="src/main.ts" {7,10}
+import "reflect-metadata";
+
+import { AppInstance, Environments, ServerEnvironment } from "@expressots/core";
+import { container } from "./app.container";
+
+async function bootstrap() {
+  Environments.checkAll();
+  AppInstance.create(container);
+  AppInstance.listen(
+    Number(process.env.PORT) ?? 3000,
+    ServerEnvironment.Development,
+  );
+}
+
+bootstrap();
+```
+
+### Environment Checks
+
+Adding ```Environments.checkAll();{:ts}``` ensures that our environment is sound before the application starts. This is a proactive approach, helping to catch issues early.
+
+### Feedback on Missing `.env` and Variables
+
+When you don't provide the `.env` file or the `PORT` variable, ExpressoTS kindly informs you. This is immensely helpful for debugging and avoids _"silent failures."_
+
+```bash title="terminal" /PORT/#g
+[timestamp] [core-api] [env-validator-provider] info: Environment variable PORT is not defined.
+```
+
+### Creating `.env` and Updating Port
+
+1. We start by creating an empty `.env` file, simulating a missing `PORT` variable.
+2. The server informs us that the `PORT` variable is missing.
+3. We then set `PORT` to `3001` in the `.env` file.
+
+### Verify New Port
+
+Finally, when the server restarts, it picks up the `PORT` value from `.env`. As expected, the server now runs on port ```3001{:ts}```.
+
+```bash title="terminal" /3001/#g
+[INFO] ts-node-dev ver. 2.0.0 (using ts-node ver. 10.9.1, typescript ver. 4.9.5)
+Application version not provided is running on port 3001 - Environment: development
+```
+
+**Fantastic**, we now have a flexible, environment-aware application. This is a crucial step for making the application ready for various stages of deployment, like development, testing, and production. 🌐
+
+## Utilizing the CLI for Efficient Development 🛠️
+
+### Changing to Opinionated Mode
+
+Switching the project to be opinionated is as simple as modifying `expressots.config.ts`:
+
+```ts title="expressots.config.ts" {6} /true/#v
+import { ExpressoConfig, Pattern } from "@expressots/core";
+
+const config: ExpressoConfig = {
+  sourceRoot: "src",
+  scaffoldPattern: Pattern.KEBAB_CASE,
+  opinionated: true,
+};
+
+export default config;
+```
+
+### Scaffolding Services with the CLI
+
+The Expresso CLI is versatile and can assist in creating various resources. To understand its capabilities:
+
+```bash title="terminal"
+❮ pnpx @expressots/cli generate --help
+[🐎 Expressots]
+
+expressots generate [schematic] [path]
+
+Scaffold a new resource
+
+Positionals:
+  schematic  The schematic to generate                   [string] [choices: "usecase", "controller", "dto", "service", "provider", "entity"]
+  path, d    The path to generate the schematic                                                                                     [string]
+  method, m  HTTP method                                                         [string] [choices: "get", "post", "put", "patch", "delete"]
+
+Options:
+  -h, --help  Show command help                                                                                                    [boolean]
+```
+
+For our scenario, we'll generate a service named `user/create`, which will scaffold a controller, use case, and provider.
+
+```bash title="terminal"
+❯ pnpx @expressots/cli generate service user/create
+
+[🐎 Expressots]
+
+  [controller]   create.controller.ts created! ✔️
+  [usecase]      create.usecase.ts created! ✔️
+  [dto]          create.dto.ts created! ✔️
+  [module]       user.module created! ✔️
+  [container]    UserModule added to app.container.ts! ✔️
+```
+
+This automates a plethora of tasks:
+
+- Creating necessary files
+- Adding the new module to `app.container.ts`
+- Extending the existing `app.module.ts`
+
+The changes are reflected in `src/app.container.ts`:
+
+```ts
+const container = appContainer.create([AppModule, UserModule]);
+```
+
+### Structuring the Service Directory
+
+By default, without a trailing slash in the CLI command, the scaffold looks like this:
+
+```bash title="terminal"
+❮ tree src/user
+├── create.controller.ts
+├── create.dto.ts
+└── create.usecase.ts
+user.module.ts
+```
+
+However, adding a trailing slash creates a more modular folder structure, better suited for extending functionalities such as CRUD operations.
+
+After reverting previous changes:
+
+```bash title="terminal"
+❯ pnpx @expressots/cli generate service user/create/
+```
+
+The new structure is:
+
+```bash title="terminal"
+❯ tree src/user
+├── create
+│   ├── create.controller.ts
+│   ├── create.dto.ts
+│   └── create.usecase.ts
+└── user.module.ts
+```
+
+This fine-tuned control over the codebase structure is immensely helpful for managing large projects efficiently.
+
+## Completing the User Creation Feature 🛠️
+
+### Updating DTOs
+
+Your DTOs specify the shape of incoming and outgoing data:
+
+```ts title="src/user/create/create.dto.ts" {2-3,6-7}
+interface ICreateRequestDTO {
+  name: string;
+  age: number;
+}
+
+interface ICreateResponseDTO extends ICreateRequestDTO {
+  id: string;
+}
+
+export { ICreateRequestDTO, ICreateResponseDTO };
+}
+```
+
+### Adjusting the Controller
+
+The controller now listens to POST requests and forwards the payload to the use case:
+
+```ts title="src/user/create/create.controller.ts" {4-5,11,18,20,24} /payload/#v /user/#v
+import { BaseController, StatusCode } from "@expressots/core";
+import {
+  controller,
+  httpPost,
+  requestBody,
+  response,
+} from "inversify-express-utils";
+import { Response } from "express";
+import { CreateUseCase } from "./create.usecase";
+import { ICreateRequestDTO, ICreateResponseDTO } from "./create.dto";
+
+@controller("/user/create")
+class CreateController extends BaseController {
+  constructor(private createUseCase: CreateUseCase) {
+    super("create-controller");
+  }
+
+  @httpPost("/")
+  execute(
+    @requestBody() payload: ICreateRequestDTO,
+    @response() res: Response,
+  ): ICreateResponseDTO {
+    return this.callUseCase(
+      this.createUseCase.execute(payload),
+      res,
+      StatusCode.OK,
+    );
   }
 }
 
-export { AppController };
+export { CreateController };
 ```
 
-Note the execute call from the useCase is being called from the controller, this is a good practice to keep the controller as thin as possible.
+### Updating the Use Case
+
+The use case is now a singleton, maintaining a state of user records:
+
+```ts title="src/user/create/create.usecase.ts" {1-3,5,7,9,13-24}
+import { provideSingleton } from "@expressots/core";
+import { ICreateRequestDTO, ICreateResponseDTO } from "./create.dto";
+import crypto from "crypto";
+
+interface User extends ICreateResponseDTO {}
+
+@provideSingleton(CreateUseCase)
+class CreateUseCase {
+  private users: User[] = [];
+
+  constructor() {}
+
+  execute(payload: ICreateRequestDTO): ICreateResponseDTO {
+    if (this.users.find((user) => user.name === payload.name)) {
+      throw new Error("User already exists");
+    }
+
+    const user: User = {
+      ...payload,
+      id: crypto.randomUUID(),
+    };
+
+    this.users.push(user);
+    return user;
+  }
+}
+
+export { CreateUseCase };
+```
+
+### Testing the Functionality
+
+First attempt at creating a user:
+
+```bash title="terminal"
+❯ http POST :3000/user/create name=John age=20
+```
+```json
+{
+  "age": "20",
+  "id": "4e1ed6e3-e4a6-48b6-bb77-390fc331b5b6",
+  "name": "John"
+}
+```
+
+Second attempt fails as expected:
+
+```bash
+❯ http POST :3000/user/create name=John age=20
+```
+```json
+{
+  "error": "User already exists"
+}
+```
+
+### Wrapping Up 🎉
+
+Although this approach may not align 100% with best practices, it provides a functional example. The ***Opinionated Architecture*** extends this example into a more robust setup, which includes repositories, entities, and more.
+
+Thanks for following along! Hope this was insightful and stay tuned for more! 👋
