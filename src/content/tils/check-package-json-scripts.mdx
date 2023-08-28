@@ -1,0 +1,18 @@
+---
+title: "Quickly Inspect package.json Scripts"
+publishedAt: 2023-08-28
+slug: "til-quick-inspect-package-json-scripts"
+tags: ["bash", "shell", "json"]
+---
+
+Not exactly new knowledge, but today I felt like adding another utility alias to my toolkit:
+
+```zsh
+package-scripts() {
+  cat package.json | jq ".scripts"
+}
+```
+
+This tiny shell function spits out all the scripts defined in your ```package.json{:bash}``` file. It's a swift way to review available scripts without the hassle of scrolling through endless dependencies in the file.
+
+For those dabbling with [nushell](https://www.nushell.sh/), the equivalent command would be a breeze: ```open package.json | get scripts{:zsh}```. Still getting my feet wet with nushell, so for now, this zsh alias will do the job.
