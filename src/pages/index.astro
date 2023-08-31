@@ -18,7 +18,11 @@ const posts = await getCollection("posts");
   <main class="slide-enter-content flex flex-col gap-20">
     <article class="flex flex-col gap-8">
       <header>
-        <h1 class="text-3xl text-neutral-100">{"Hi, I’m <Daniel::Boll>"}<p class="wave">👋</p></h1>
+        <div class="flex flex-row gap-1">
+          <h1 class="text-3xl text-neutral-100">{"Hi, I’m"}</h1>
+          <h1 class="text-3xl font-extrabold text-neutral-100 text-transparent bg-clip-text bg-gradient-to-br from-primary-400 to-secondary-600">{"<Daniel::Boll>"}</h1>
+          <p class="text-3xl wave">👋</p>
+        </div>
         <h2 class="text-xl text-secondary-500">ダーニエル</h2>
       </header>
       <h2
