@@ -16,7 +16,7 @@ const { post } = Astro.props;
 const viewsAPI = await fetch(`${Astro.url.origin}/api/view/${post.slug}`, {
   method: "GET",
 });
-const { views } = await viewsAPI.json();
+const { views } = await viewsAPI.json().catch(() => ({ views: 0 }));
 ---
 
 <a

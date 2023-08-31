@@ -51,7 +51,7 @@ const og = {
 const viewsAPI = await fetch(`${Astro.url.origin}/api/view/${slug}`, {
   method: "POST"
 });
-const { views } = await viewsAPI.json();
+const { views } = await viewsAPI.json().catch(() => ({ views: 0 }));
 ---
 <Layout title={title} og={og}>
   <div class="gap-10 lg:flex lg:items-start">
