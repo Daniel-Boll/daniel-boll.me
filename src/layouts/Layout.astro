@@ -5,6 +5,7 @@ import SEOTags from "@/components/seo/SEOTags.astro";
 import "@fontsource/open-sans";
 import "@/styles/tailwind.css";
 import "@/styles/post.css";
+import ThemeProvider from "@/components/ThemeProvider.astro";
 
 export interface Props {
   title?: string;
@@ -25,9 +26,10 @@ const { title, og } = Astro.props;
   <SEOTags title={title} og={og} />
 
   <body
-    class="mx-auto flex min-h-screen max-w-[872px] flex-col gap-9 bg-[#050505] px-10 py-8 text-sm text-neutral-400 md:gap-20 md:py-16"
+    class="mx-auto flex min-h-screen max-w-[872px] flex-col gap-9 bg-[#050505] dark:bg-[#050505] px-10 py-8 text-sm text-neutral-400 md:gap-20 md:py-16"
   >
     <Header />
+    <ThemeProvider />
     <slot />
     <style is:global>
       html {

@@ -1,17 +1,19 @@
-import { defineConfig } from "astro/config";
+import fs from "fs";
+
 import tailwind from "@astrojs/tailwind";
 import sitemap from "@astrojs/sitemap";
 import mdx from "@astrojs/mdx";
 import prefetch from "@astrojs/prefetch";
 import preact from "@astrojs/preact";
-import rehypePrettyCode, {
-  Options as PrettyCodeOptions,
-} from "rehype-pretty-code";
+import vercel from "@astrojs/vercel/serverless";
+import { defineConfig } from "astro/config";
+
+import rehypePrettyCode from "rehype-pretty-code";
+import type { Options as PrettyCodeOptions } from "rehype-pretty-code";
+import Icons from "unplugin-icons/vite";
+
 import { SITE_URL } from "./src/data/config";
 import { remarkReadingTime } from "./src/plugins";
-import fs from "fs";
-import vercel from "@astrojs/vercel/serverless";
-import Icons from "unplugin-icons/vite";
 
 const prettyCodeOptions: PrettyCodeOptions = {
   keepBackground: false,
@@ -23,10 +25,6 @@ const prettyCodeOptions: PrettyCodeOptions = {
 // https://astro.build/config
 export default defineConfig({
   site: SITE_URL,
-  experimental: {
-    assets: true,
-    viewTransitions: true,
-  },
   integrations: [
     mdx(),
     tailwind(),

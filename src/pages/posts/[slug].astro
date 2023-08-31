@@ -1,10 +1,23 @@
 ---
-import { CollectionEntry, getCollection } from "astro:content";
+import 'odometer/themes/odometer-theme-default.css';
+
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
 import { Image } from "astro:assets";
 
 import Layout from "@/layouts/Layout.astro";
-import formatDate from "@/utils/formatDate";
 import CommentSection from "@/components/post/Utterances.astro";
+import { Odometer } from "@/components/odometer";
+import formatDate from "@/utils/formatDate";
+import { getOgImagePath } from "@/utils/open-graph/image-path";
+import Eye from "@/utils/icons/eye.astro";
+import TOC from '@/components/post/TOC.astro';
+
+type Post = CollectionEntry<"posts">;
+
+type Props = {
+  readingTime: string;
+} & Post;
 
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
@@ -15,12 +28,6 @@ export async function getStaticPaths() {
   }));
 }
 
-type Post = CollectionEntry<"posts">;
-
-type Props = {
-  readingTime: string;
-} & Post;
-
 const { 
   data: {
     title, 
@@ -30,55 +37,49 @@ const {
     coverAlt
   }, 
   render,
+  slug
 } = Astro.props;
 
-
-export const getOgImagePath = (filename: string = "Default Value") => {
-  if (filename.startsWith("/")) filename = filename.substring(1);
-
-  if (filename.endsWith("/"))
-    filename = filename.substring(0, filename.length - 1);
-
-  if (filename === "") filename = "Default Value";
-
-  return `./open-graph/${filename}.png`;
-};
-
-const ogImage = new URL(getOgImagePath(Astro.url.pathname), Astro.url.origin)
-  .href;
-
-const { Content, remarkPluginFrontmatter: { readingTime } } = await render();
-
+const { Content, remarkPluginFrontmatter: { readingTime }, headings } = await render();
 
 const og = {
   title: title,
   description: description,
-  image: ogImage,
+  image: new URL(getOgImagePath(Astro.url.pathname), Astro.url.origin).href,
 }
+
+const viewsAPI = await fetch(`${Astro.url.origin}/api/view/${slug}`, {
+  method: "POST"
+});
+const { views } = await viewsAPI.json();
 ---
-
 <Layout title={title} og={og}>
-  <main class="post mx-auto flex w-full min-w-prose flex-col gap-4">
-
-    <div class="md:flex space-x-10">
-      <div class="w-full">
-        <div class="not-prose">
-          {cover && coverAlt && <Image class="my-10 mb-1 rounded-xl" src={cover} alt={coverAlt} sizes="680" />}
+  <div class="gap-10 lg:flex lg:items-start">
+    {!!headings.length && <TOC headings={headings} />}
+    <main class="post mx-auto flex w-full min-w-prose flex-col gap-4">
+      <div class="md:flex space-x-10">
+        <div class="w-full">
+          <div class="not-prose">
+            {cover && coverAlt && <Image class="my-10 mb-1 rounded-xl" src={cover} alt={coverAlt} sizes="680" />}
+          </div>
         </div>
       </div>
-    </div>
-    <header role="presentation">
-      <h1 class="text-lg font-bold text-center">
-        {title}
-      </h1>
-      <p class="italic text-center">{description} - {formatDate(publishedAt)}</p>
-      <p class="text-sm text-gray-500">{readingTime}</p>
-    </header>
+      <header role="presentation">
+        <h1 transition:name="post-title" class="text-lg font-bold text-center">
+          {title}
+        </h1>
+        <p class="italic text-center">{description} - {formatDate(publishedAt)}</p>
+        <div class="flex flex-row gap-1 items-center text-sm text-gray-500">
+          <p class="text-sm text-gray-500">{readingTime}</p>
+          <Eye /> <Odometer client:only quantity={views} /> views
+        </div>
+      </header>
 
-    <div class="post mx-auto flex w-full min-w-prose flex-col gap-4 slide-enter-content">
-      <Content />
-    </div>
+      <div class="post mx-auto flex w-full min-w-prose flex-col gap-4 slide-enter-content">
+        <Content />
+      </div>
 
-    <CommentSection />
-  </main>
+    </main>
+  </div>
+  <CommentSection />
 </Layout>

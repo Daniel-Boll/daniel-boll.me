@@ -1,12 +1,22 @@
 ---
+import 'odometer/themes/odometer-theme-default.css';
+
 import type { CollectionEntry } from "astro:content";
 import formatDate from "@/utils/formatDate";
+import Eye from "@/utils/icons/eye.astro";
+
+import { Odometer } from "@/components/odometer";
 
 export interface Props {
   post: CollectionEntry<"posts">;
 }
 
 const { post } = Astro.props;
+
+const viewsAPI = await fetch(`${Astro.url.origin}/api/view/${post.slug}`, {
+  method: "GET",
+});
+const { views } = await viewsAPI.json();
 ---
 
 <a
@@ -14,7 +24,7 @@ const { post } = Astro.props;
   href={`/posts/${post.slug}`}
 >
   <div class="flex w-full items-center justify-between">
-    <h2 class="text-lg">{post.data.title}</h2>
+    <h2 transition:name="post-title" class="text-lg">{post.data.title}</h2>
 
     <div class="flex flex-row items-center gap-4">
       <p>{formatDate(post.data.publishedAt)}</p>
@@ -41,4 +51,8 @@ const { post } = Astro.props;
     </div>
   </div>
   <p>{post.data.description}</p>
+
+  <div class="flex flex-row gap-1 items-center text-sm text-gray-500">
+    <Eye /> <Odometer client:only quantity={views} /> views
+  </div>
 </a>

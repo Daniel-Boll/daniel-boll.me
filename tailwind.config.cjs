@@ -1,5 +1,12 @@
 const defaultTheme = require("tailwindcss/defaultTheme");
 const colors = require("tailwindcss/colors");
+// const config = require("./tailwind.theme.config.cjs");
+//
+// const themeConfig =
+//   process.env.THEME_KEY && config[process.env.THEME_KEY]
+//     ? config[process.env.THEME_KEY]
+//     : config.default;
+// const { colors } = themeConfig;
 
 const linkHeadingStyles = {
   color: colors.gray[100],
@@ -13,6 +20,8 @@ const linkHeadingStyles = {
 module.exports = {
   plugins: [require("@tailwindcss/typography")],
   content: ["./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}"],
+  darkMode: "class",
+  safelist: ["dark"],
   theme: {
     extend: {
       fontFamily: {
@@ -20,6 +29,7 @@ module.exports = {
         iosevka: ["Iosevka", ...defaultTheme.fontFamily.mono],
       },
       colors: {
+        // ...colors,
         primary: {
           50: "#fff8f1",
           100: "#ffebd9",
@@ -100,5 +110,12 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  variants: {
+    extend: { typography: ["dark"] },
+  },
+  plugins: [
+    require("@tailwindcss/typography"),
+    require("@tailwindcss/forms"),
+    require("@tailwindcss/aspect-ratio"),
+  ],
 };

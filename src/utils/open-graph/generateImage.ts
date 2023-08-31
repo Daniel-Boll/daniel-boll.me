@@ -1,6 +1,7 @@
 import sharp from "sharp";
 import { readFile } from "node:fs/promises";
-import satori, { SatoriOptions } from "satori";
+import satori from "satori";
+import type { SatoriOptions } from "satori";
 import { OpenGraphTemplate } from "./template";
 
 export const generateOgImage = async ({
