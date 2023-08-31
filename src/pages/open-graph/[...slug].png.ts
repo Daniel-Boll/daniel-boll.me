@@ -2,6 +2,8 @@ import { generateOgImage } from "@/utils/open-graph/generateImage";
 import type { APIRoute, GetStaticPaths, GetStaticPathsItem } from "astro";
 import { getCollection } from "astro:content";
 
+export const prerender = true;
+
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getCollection("posts");
 

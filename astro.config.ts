@@ -39,10 +39,11 @@ export default defineConfig({
     rehypePlugins: [[rehypePrettyCode, prettyCodeOptions]],
     remarkPlugins: [remarkReadingTime],
   },
-  output: "hybrid",
+  output: "server",
   adapter: vercel({
     analytics: true,
     imageService: true,
+    functionPerRoute: false
   }),
   vite: {
     plugins: [
