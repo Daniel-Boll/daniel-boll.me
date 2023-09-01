@@ -1,5 +1,6 @@
 import { defineCollection, z } from "astro:content";
 
+// TODO: Add an optional from-to color gradient
 const posts = defineCollection({
   type: "content",
   schema: ({ image }) =>
@@ -16,6 +17,9 @@ const posts = defineCollection({
       seriesId: z.string().optional(),
       orderInSeries: z.number().optional(),
       isDraft: z.boolean().default(false),
+
+      from: z.string().optional().default("gray-100"),
+      to: z.string().optional().default("gray-800")
     }),
 });
 

@@ -11,6 +11,7 @@ const colors = require("tailwindcss/colors");
 const linkHeadingStyles = {
   color: colors.gray[100],
   borderBottomColor: "transparent",
+  fontWeight: "bold",
   "&:hover": {
     color: `${colors.gray[900]}`,
   },
@@ -29,7 +30,6 @@ module.exports = {
         iosevka: ["Iosevka", ...defaultTheme.fontFamily.mono],
       },
       colors: {
-        // ...colors,
         primary: {
           50: "#fff8f1",
           100: "#ffebd9",

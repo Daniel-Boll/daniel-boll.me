@@ -36,7 +36,9 @@ const {
     publishedAt, 
     description,
     cover,
-    coverAlt
+    coverAlt,
+    from,
+    to
   }, 
   render,
   slug
@@ -67,7 +69,18 @@ const { views } = await viewsAPI.json().catch(() => ({ views: 0 }));
         </div>
       </div>
       <header role="presentation">
-        <h1 transition:name="post-title" class="text-lg font-bold text-center">
+        <!-- <h1  -->
+        <!--   transition:name="post-title"  -->
+        <!--   class:list={[ -->
+        <!--     "text-lg font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-br", -->
+        <!--     `from-${from ? from : 'gray-100'}`, -->
+        <!--     `to-${to ? to : 'gray-800'}` -->
+        <!--   ]}> -->
+        <!--   {title} -->
+        <!-- </h1> -->
+        <h1 
+          transition:name="post-title" 
+          class={"text-lg font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-br from-sky-300 to-sky-800"}>
           {title}
         </h1>
         <p class="italic text-center">{description} - {formatDate(publishedAt)}</p>

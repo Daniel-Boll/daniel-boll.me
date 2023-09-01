@@ -6,12 +6,16 @@
   @apply rounded-md bg-black px-1 py-[2px] text-red-500;
 }
 
+.post h1 {
+  @apply mt-8 text-4xl font-bold;
+}
+
 .post h2 {
-  @apply mt-6 text-3xl text-neutral-100;
+  @apply mt-6 text-3xl text-neutral-100 font-bold;
 }
 
 .post h3 {
-  @apply mt-4 text-xl text-neutral-100;
+  @apply mt-4 text-xl text-neutral-100 font-bold;
 }
 
 .post a {
