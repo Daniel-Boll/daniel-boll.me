@@ -1,7 +1,906 @@
 ---
-title: "A breakfest with ExpressoTS and Bun"
-publishedAt: 2023-08-25
-description: "Experimenting an ExpressoTS-like framework with Bun and ElysiaJS"
+title: "Brewing a Full-Stack Breakfast with ExpressoTS, Bun, and Elysia"
+publishedAt: 2023-09-10
+description: "Combine the power of ExpressoTS with Bun's Elysia framework in TypeScript for a mouth-watering full-stack experience."
 slug: "a-breakfest-with-expressots-and-bun"
-planned: true
+planned: false
 ---
+
+import Trivia from "@/components/mdx/Trivia.astro";
+import SeeAlso from "@/components/mdx/SeeAlso.astro";
+
+## Introduction
+
+Welcome to a hands-on guide focused on integrating ExpressoTS, Bun, and Elysia into a full-stack TypeScript application. Let's cut to the chase and see what ingredients we'll be working with.
+
+### Our Ingredients
+
+- #### [**ExpressoTS**](https://expresso-ts.com)
+
+This TypeScript framework is designed for server-side applications. It offers flexibility in project structure and supports multiple
+architectural patterns, including MVC. If you like your applications like your coffee — robust and versatile — ExpressoTS is your go-to.
+
+<SeeAlso slug="a-first-project-with-expressots" />
+
+- #### [**Bun**](https://bun.sh)
+
+An all-in-one toolkit that brings speed and efficiency to your JavaScript and TypeScript projects.
+Think of Bun as the wholesome bread holding all your stack's ingredients together.
+It's an entire toolbox in one neat package, and it's faster than you can say "bun in the oven."
+
+- #### [**ElysiaJS**](https://elysiajs.com/)
+
+A Bun web framework that promises performance, simplicity, and flexibility. Designed with TypeScript in mind, Elysia is like that final
+touch of seasoning that takes your project from good to great.
+
+<Trivia emoji="🍳">
+  So, whether you're into French toast or a classic Eggs Benedict, the aim of this blog post is to show you how to whip up a dish that's not just full of flavor, but also robust and scalable.
+</Trivia>
+
+## Getting Started: Your First Bite of Elysia
+
+Now that we've set the table with the ingredients, let's start cooking. We'll begin by setting up a basic Elysia application using Bun.
+
+### 1. Install Bun
+
+First, you'll need to download and install Bun. Open your terminal and run the following command:
+
+```bash title="terminal"
+curl -fsSL https://bun.sh/install | bash
+```
+
+This will download and install Bun on your machine, equipping you with a fast and efficient JavaScript runtime.
+
+### 2. Create Your Elysia Project
+
+Once Bun is installed, it's time to create your Elysia project. Run:
+
+```bash title="terminal"
+bun create elysia breakfast-ts
+```
+
+You should see a message like this:
+
+```bash title="terminal"
+Created elysia project successfully
+
+# To get started, run:
+
+  cd breakfast-ts
+  bun run src/index.ts
+```
+
+### 3. Run Your Application
+
+Follow the instructions in the terminal message:
+
+```bash title="terminal"
+cd breakfast-ts
+bun run src/index.ts
+```
+
+And just like that, you should see the message, instantaneously 🌪:
+
+```bash title="terminal"
+🦊 Elysia is running at localhost:3000
+```
+
+Voila! You've just whipped up your first Elysia app, hot and fresh.
+
+### 4. Verify Your Application
+
+To verify Elysia's functionality, you can perform a health check using the provided endpoint. While I'll be using [httpie](https://httpie.io/) for its straightforward API, you're welcome to use `curl` if you prefer.
+
+```bash title="terminal"
+http :3000
+```
+```http title="response"
+HTTP/1.1 200 OK
+Content-Length: 12
+Date: Sun, 10 Sep 2023 20:47:46 GMT
+content-type: text/plain;charset=utf-8
+
+Hello Elysia
+```
+
+## Extending Elysia: Crafting a Simple User CRUD
+
+With the basic setup out of the way, let's extend our Elysia app by adding some CRUD functionality for users.
+This will serve as a good starting point before we dive into more complex operations in future posts.
+
+### 1. Run Your Application in Watch Mode
+
+First, stop the server if it's running. Then leverage Bun's watch mode, which will automatically reload the application
+when changes are made to the source code:
+
+```bash title="terminal" /--watch/#s
+bun run --watch src/index.ts
+```
+
+### 2. Add User CRUD Routes
+
+Now, let's define some basic CRUD operations. Open `src/index.ts` and add to your existing code the following:
+
+```typescript title="src/index.ts" {4-11,16}
+import { Elysia } from "elysia";
+
+// Create a user route group
+const user = new Elysia().group("user", (app) =>
+  app
+    .get("/", () => "All users")
+    .get("/:id", (context) => `Hello, ${context.params.id}`)
+    .post("/", () => "Create User")
+    .put("/:id", (context) => `Update User ${context.params.id}`)
+    .delete("/:id", (context) => `Delete User ${context.params.id}`)
+);
+
+// Main app
+const app = new Elysia()
+  .get("/", () => "Hello Elysia")
+  .use(user)
+  .listen(3000);
+
+console.log(
+  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
+);
+```
+
+Here, we've used Elysia's ```group<Prefix extends string = string>(prefix: Prefix, run: (group: Elysia<...>)){:typescript}``` method to bundle all user-related routes together. We've defined routes for getting all users, getting a single user by ID, creating a user, updating a user, and deleting a user.
+
+
+### 3. More Advanced Features
+
+***Note:*** You can extend this basic setup in various ways. Elysia supports both simple state management within the server and more advanced
+dependency injection techniques for robust applications. Check out Elysia's documentation on
+[State Decorate](https://elysiajs.com/concept/state-decorate.html) and
+[Dependency Injection](https://elysiajs.com/patterns/dependency-injection.html) if you're interested.
+
+<Trivia emoji="⌛">
+  For the sake of this blog post, we're keeping it simple. If you are willing to expand your horizons, however, you are **encouraged** to check out the
+  [**Call to Action**](#call-to-action) section at the end of this post, where you may help the ExpressoTS community in the bun integration.
+</Trivia>
+
+### 4. Test Your User CRUD Endpoints
+
+After running your server, you can test each endpoint to make sure they're working as intended.
+
+- #### **Get All Users**
+
+```bash title="terminal"
+http :3001/user
+```
+```http title="response"
+HTTP/1.1 200 OK
+Content-Length: 9
+Date: Sun, 10 Sep 2023 20:47:46 GMT
+content-type: text/plain;charset=utf-8
+
+All users
+```
+
+- #### **Get a Single User**
+
+Replace `{id}` with the ID of the user you're interested in.
+
+```bash title="terminal"
+http :3001/user/42
+```
+```http title="response"
+HTTP/1.1 200 OK
+Content-Length: 11
+Date: Sun, 10 Sep 2023 20:47:46 GMT
+content-type: text/plain;charset=utf-8
+
+Hello, 42
+```
+
+- #### **Create a User**
+
+```bash title="terminal"
+http POST :3001/user
+```
+```http title="response"
+HTTP/1.1 200 OK
+Content-Length: 11
+Date: Sun, 10 Sep 2023 20:47:46 GMT
+content-type: text/plain;charset=utf-8
+
+Create User
+```
+
+- #### **Update a User**
+
+Again, replace `{id}` with the ID of the user you want to update.
+
+```bash title="terminal"
+http PUT :3001/user/42
+```
+```http title="response"
+HTTP/1.1 200 OK
+Content-Length: 16
+Date: Sun, 10 Sep 2023 20:47:46 GMT
+content-type: text/plain;charset=utf-8
+
+Update User 42
+```
+
+- #### **Delete a User**
+
+And one last time, replace `{id}` with the ID of the user you want to delete.
+
+```bash title="terminal"
+http DELETE :3001/user/42
+```
+```http title="response"
+HTTP/1.1 200 OK
+Content-Length: 16
+Date: Sun, 10 Sep 2023 20:47:46 GMT
+content-type: text/plain;charset=utf-8
+
+Delete User 42
+```
+
+Now you've successfully tested all of your user CRUD operations. It's like a full-course breakfast — everything is present and accounted for!
+
+## Diving into the Heart of the Matter: **Reflection** and **Decorators**
+
+In programming, reflection is a mechanism that allows you to inspect and manipulate program elements like classes and objects at runtime. In other words, reflection enables a program to observe its own structure, similar to how you can observe your own reflection in the mirror. This allows for greater dynamic behavior, enabling more powerful and flexible constructs like decorators.
+
+### Enter the classic ```import "reflect-metadata"{:typescript}```
+
+For our endeavor, we'll use ***reflect-metadata***, a library that enables the addition and retrieval of runtime type metadata.
+This is particularly useful when working with decorators in TypeScript.
+With ```import "reflect-metadata"{:typescript}```, we can attach metadata directly to classes and properties, providing a deeper level of customization.
+
+### Installing *reflect-metadata*
+
+In the spirit of brevity, let's get it into our project right away. Execute the following command:
+
+```bash title="terminal"
+bun add reflect-metadata@latest
+```
+
+<Trivia emoji="🌪">
+  You'll notice how incredibly fast that was, god damn — another win for Bun.
+</Trivia>
+
+This sets the stage for us to delve into creating our ExpressoTS framework on top of Elysia, enriched with the powers of reflection and decorators. Trust me, it'll be the butter on the toast of our breakfast-themed stack!
+
+### Creating Our Pseudo-Framework
+
+I'll create a directory `src/breakfast-ts/` to house `src/breakfast-ts/decorators.ts`, a crucial code file for our project.
+
+### Understanding the Building Blocks of Breakfast-TS: A Guide to Decorators
+
+Let's take a moment to understand the decorators that make up the foundation of our Breakfast-TS pseudo-framework. If you're new to the concept of decorators or TypeScript metadata, fear not — this section aims to introduce these ideas step by step.
+
+- #### **What Are Symbols?**
+
+Before diving into the decorators themselves, let's briefly discuss Symbols. A Symbol is a unique and immutable data type that is often used to identify object properties. In our code, we're using them to create unique keys for our metadata:
+
+```ts
+export const CONTROLLER_KEY = Symbol("controller");
+// ... other keys
+```
+
+- #### **What is a Controller?**
+
+In the world of web frameworks, a Controller is a class responsible for handling incoming HTTP requests and sending responses.
+Our ```function Controller(){:typescript}``` decorator is a way to mark a class as one such handler. Here's how it works:
+
+```ts
+export function Controller(prefix: string): ClassDecorator {
+  return (target) => {
+    Reflect.defineMetadata(CONTROLLER_KEY, prefix, target);
+  };
+}
+```
+When you add ```@Controller("/api"){:typescript}``` above a class, this decorator tells our framework that this class is responsible for routes that start with ```"/api"{:typescript}```.
+
+- #### **Grouping with Modules**
+
+In larger applications, it can be useful to group related controllers and use-cases together. That's where our ```function Module(){:typescript}``` decorator comes in:
+
+```ts
+export function Module(options: {
+  usecases: any[];
+  controllers: any[];
+}): ClassDecorator {
+  return (target) => {
+    Reflect.defineMetadata(MODULE_KEY, options, target);
+  };
+}
+```
+
+The ```function Module(){:typescript}``` decorator expects an ```(options: { ... }){:typescript}``` object that can include arrays of ```usecases: any[]{:typescript}``` and ```controllers: any[]{:typescript}```.
+
+- #### **What is Dependency Injection?**
+
+Dependency Injection is a design pattern used to increase code modularity and ease testing. Our ```function Injectable(){:typescript}``` decorator indicates that a class can have dependencies automatically provided, rather than having to create them internally.
+
+```ts
+export function Injectable(): ClassDecorator {
+  return (target) => {
+    Reflect.defineMetadata(INJECTABLE_KEY, true, target);
+  };
+}
+```
+
+- #### **Making Routes**
+
+Now, how do we specify which function should run for a specific HTTP request like **GET** or **POST**? For this, we have specific decorators:
+
+```ts
+function Route(method: string, route: string): MethodDecorator {
+  return (target, propertyKey) => {
+    Reflect.defineMetadata(METHOD_KEY, method, target, propertyKey as string);
+    Reflect.defineMetadata(ROUTE_KEY, route, target, propertyKey as string);
+  };
+}
+
+export function Get(route: string = "/"): MethodDecorator {
+  return Route("get", route);
+}
+
+export function Post(route: string = "/"): MethodDecorator {
+  return Route("post", route);
+}
+```
+
+These decorators specify which HTTP method (GET, POST, etc.) a method in our controller class should respond to.
+
+- #### **The Full Picture**
+
+Here's the full code combining all these concepts:
+
+```ts title="src/breakfast-ts/decorators.ts"
+import "reflect-metadata";
+
+export const CONTROLLER_KEY = Symbol("controller");
+export const METHOD_KEY = Symbol("method");
+export const ROUTE_KEY = Symbol("route");
+export const MODULE_KEY = Symbol("module");
+export const INJECTABLE_KEY = Symbol("injectable");
+
+export function Controller(prefix: string): ClassDecorator {
+  return (target) => {
+    Reflect.defineMetadata(CONTROLLER_KEY, prefix, target);
+  };
+}
+
+export function Module(options: {
+  usecases: any[];
+  controllers: any[];
+}): ClassDecorator {
+  return (target) => {
+    Reflect.defineMetadata(MODULE_KEY, options, target);
+  };
+}
+
+export function Injectable(): ClassDecorator {
+  return (target) => {
+    Reflect.defineMetadata(INJECTABLE_KEY, true, target);
+  };
+}
+
+function Route(method: string, route: string): MethodDecorator {
+  return (target, propertyKey) => {
+    Reflect.defineMetadata(METHOD_KEY, method, target, propertyKey as string);
+    Reflect.defineMetadata(ROUTE_KEY, route, target, propertyKey as string);
+  };
+}
+
+export function Get(route: string = "/"): MethodDecorator {
+  return Route("get", route);
+}
+
+export function Post(route: string = "/"): MethodDecorator {
+  return Route("post", route);
+}
+```
+
+With these decorators, we have versatile tools to structure our application, making it both maintainable and scalable. And just like that, you've brewed the perfect cup of ExpressoTS to kickstart your day!
+
+### A Closer Look at the BreakfastFactory: Cooking Up Your Routes
+
+Let's dig into another important part of our Breakfast-TS framework, the ```class BreakfastFactory{:typescript}```.
+This class plays the role of a master chef, bringing all the ingredients together to serve a tasty API.
+Create this file at ```src/breakfast-ts/index.ts{:bash}```.
+
+- #### **Initialization and Setting Up Elysia**
+
+We start by importing the necessary modules and metadata keys. Then, the ```class BreakfastFactory{:typescript}``` is defined.
+It has a property ```private app: Elysia;{:typescript}```, which is an instance of Elysia:
+
+```ts title="src/breakfast-ts/index.ts" {2,4-6}
+export class BreakfastFactory {
+  private app: Elysia;
+
+  constructor() {
+    this.app = new Elysia();
+  }
+}
+```
+
+- #### **The ```static create() {}{:typescript}``` method**
+
+The ```static create(module: any) {}{:typescript}``` method is the centerpiece. It takes a module as an argument and proceeds to configure routes and controllers.
+
+```ts title="src/breakfast-ts/index.ts" {9}
+export class BreakfastFactory {
+  private app: Elysia;
+
+  constructor() {
+    this.app = new Elysia();
+  }
+
+  static create(module: any) {
+    const factory = new BreakfastFactory();
+  }
+}
+```
+
+- #### **Fetching Metadata and Initializing Providers**
+
+First, we extract metadata from the AppModule using ```Reflect.getMetadata{:typescript}```.
+Then, we instantiate all the providers mentioned in the ```usecases{:typescript}``` field of the module metadata:
+
+```ts title="src/breakfast-ts/index.ts" {11-15}
+export class BreakfastFactory {
+  private app: Elysia;
+
+  constructor() {
+    this.app = new Elysia();
+  }
+
+  static create(module: any) {
+    const factory = new BreakfastFactory();
+
+    const moduleMetadata = Reflect.getMetadata(MODULE_KEY, module);
+
+    const instances = moduleMetadata.usecases.map(
+      (provider: any) => new provider(),
+    );
+  }
+}
+```
+
+- #### **Adding Routes to Elysia**
+
+Next, the method iterates over each controller, again using metadata to fetch the necessary information:
+
+```ts title="src/breakfast-ts/index.ts" {6-10}
+export class BreakfastFactory {
+  // ...
+  static create(module: any) {
+    // ...
+
+    moduleMetadata.controllers.forEach((Controller: any) => {
+      const prefix = Reflect.getMetadata(CONTROLLER_KEY, Controller);
+      const controller = new Controller(...instances);
+      // ... (More code)
+    });
+  }
+}
+```
+
+For each controller, we initiate it with the instances of ```usecases{:typescript}``` as arguments.
+Then, we scan through its methods to fetch their metadata and subsequently attach them as routes to our Elysia instance.
+
+```ts title="src/breakfast-ts/index.ts" {10-14}
+export class BreakfastFactory {
+  // ...
+  static create(module: any) {
+    // ...
+
+    moduleMetadata.controllers.forEach((Controller: any) => {
+      const prefix = Reflect.getMetadata(CONTROLLER_KEY, Controller);
+      const controller = new Controller(...instances);
+
+      Object.getOwnPropertyNames(Object.getPrototypeOf(controller)).forEach(
+        (property) => {
+          // ... (Metadata fetching and route setup)
+        },
+      );
+    });
+  }
+}
+```
+
+This specific piece of code, nested within the ```.forEach(){:typescript}``` loop for each controller, is the powerhouse of our framework.
+It brings in cool possibilities like dependency injection in Elysia's state, among others.
+
+First, we check if the property is not the ```"constructor"{:typescript}```. This is essential because the constructor is not a route,
+but merely a setup function for the object:
+
+```ts title="src/breakfast-ts/index.ts" {11-13}
+export class BreakfastFactory {
+  // ...
+  static create(module: any) {
+    // ...
+    moduleMetadata.controllers.forEach((Controller: any) => {
+      const prefix = Reflect.getMetadata(CONTROLLER_KEY, Controller);
+      const controller = new Controller(...instances);
+
+      Object.getOwnPropertyNames(Object.getPrototypeOf(controller)).forEach(
+        (property) => {
+          if (property !== "constructor") {
+            // ... (More code)
+          }
+        },
+      );
+    });
+  }
+}
+```
+
+Next, we use the Reflect API to fetch metadata associated with the method and the route.
+We're using the ```METHOD_KEY{:typescript}``` and ```ROUTE_KEY{:typescript}``` to do this:
+
+```ts title="src/breakfast-ts/index.ts" {2-7}
+if (property !== "constructor") {
+  const method = Reflect.getMetadata(
+    METHOD_KEY,
+    controller,
+    property,
+  );
+  const route = Reflect.getMetadata(ROUTE_KEY, controller, property);
+}
+```
+
+Before attaching the route to our Elysia app, we perform a quick sanity check to make sure both variables exist:
+
+```ts title="src/breakfast-ts/index.ts" {9-11}
+if (property !== "constructor") {
+  const method = Reflect.getMetadata(
+    METHOD_KEY,
+    controller,
+    property,
+  );
+  const route = Reflect.getMetadata(ROUTE_KEY, controller, property);
+
+  if (route && method !== null) {
+    // ... (More code follows)
+  }
+}
+```
+
+Once the sanity check passes, we log the route being added for better visibility:
+
+```ts
+console.log(
+  `🍳🥓☕ Adding route ${method.toUpperCase()} ${prefix}${route}`,
+);
+```
+
+The real magic happens in the following line, where we dynamically call Elysia's routing method:
+
+```ts
+// @ts-ignore
+factory.app[method](
+  prefix + route,
+  (req: any, res: any) => controller[property](req, res),
+  {
+    type: "json",
+  },
+);
+```
+
+Here, ```factory.app[method]{:typescript}``` dynamically chooses the HTTP method (GET, POST, etc.) to which we attach the route.
+The route itself is a combination of the controller prefix and the specific method route.
+
+The function ```(req: any, res: any) => controller[property](req, res){:typescript}``` is what gets executed when this route is hit.
+Essentially, it forwards the request and response objects to the corresponding method in the controller.
+
+The ```{type: "json"}{:typescript}``` part tells Elysia to treat the response as JSON.
+This is particularly useful as it sets the stage for future features like automatic response serialization, dependency injection in states, and much more.
+
+Understanding this section equips you with the skills to extend Elysia and tap into its full power.
+
+- #### **Making It Listen**
+
+Finally, the ```async function listen(port: number){:typescript}``` is quite straightforward. It makes the Elysia server listen on a specific port:
+
+```ts title="src/breakfast-ts/index.ts" {4-7}
+export class BreakfastFactory {
+  // ...
+
+  public async listen(port: number) {
+    this.app.listen(port);
+    console.log(`🦊 Elysia is running on port ${this.app.server?.port}...`);
+  }
+}
+```
+
+- #### **The Complete Code**
+
+Here's the full ```class BreakfastFactory{:typescript}``` code for reference:
+
+```ts title="src/breakfast-ts/index.ts"
+import "reflect-metadata";
+
+import Elysia from "elysia";
+import {
+  CONTROLLER_KEY,
+  METHOD_KEY,
+  MODULE_KEY,
+  ROUTE_KEY,
+} from "./decorators";
+
+export class BreakfastFactory {
+  private app: Elysia;
+
+  static create(module: any) {
+    const factory = new BreakfastFactory();
+
+    // Fetch metadata from the AppModule
+    const moduleMetadata = Reflect.getMetadata(MODULE_KEY, module);
+
+    // Create an instance of the providers
+    const instances = moduleMetadata.usecases.map(
+      (provider: any) => new provider(),
+    );
+
+    // Get controllers and add routes to Elysia
+    moduleMetadata.controllers.forEach((Controller: any) => {
+      const prefix = Reflect.getMetadata(CONTROLLER_KEY, Controller);
+      const controller = new Controller(...instances);
+
+      Object.getOwnPropertyNames(Object.getPrototypeOf(controller)).forEach(
+        (property) => {
+          if (property !== "constructor") {
+            const method = Reflect.getMetadata(
+              METHOD_KEY,
+              controller,
+              property,
+            );
+            const route = Reflect.getMetadata(ROUTE_KEY, controller, property);
+
+            if (route && method !== null) {
+              console.log(
+                `🍳🥓☕ Adding route ${method.toUpperCase()} ${prefix}${route}`,
+              );
+              // @ts-ignore
+              factory.app[method](
+                prefix + route,
+                (req: any, res: any) => controller[property](req, res),
+                {
+                  type: "json",
+                },
+              );
+            }
+          }
+        },
+      );
+    });
+
+    return factory;
+  }
+
+  constructor() {
+    this.app = new Elysia();
+  }
+
+  public async listen(port: number) {
+    this.app.listen(port);
+    console.log(`🦊 Elysia is running on port ${this.app.server?.port}...`);
+  }
+}
+```
+
+With ```class BreakfastFactory{:typescript}```, you've just set up a powerful, flexible base for your APIs.
+
+## Integrating It All Together
+
+We'll now go through how to integrate all the components we've discussed so far into a single, functional application.
+
+### The Entry Point: ```src/main.ts```
+
+We rename ```src/index.ts``` to ```src/main.ts``` to signify that it's the entry point to our application.
+This is where we use the ```class BreakfastFactory{:typescript}``` to bootstrap our entire application.
+
+```ts title="src/main.ts"
+import { BreakfastFactory } from "./breakfast-ts";
+
+async function bootstrap() {
+  const app = BreakfastFactory.create(/* A module */);
+  await app.listen(3000);
+}
+
+bootstrap();
+```
+
+Here, ```BreakfastFactory.create(AppModule){:typescript}``` bootstraps our application by initiating all controllers, routes, and use-cases
+as to be defined in a module.
+
+### The Use-Case: ```src/app/app.use-case.ts```
+
+The use-case is responsible for handling the actual business logic.
+It's marked as ```@Injectable{:typescript}```, which means it can be easily provided to other classes, like our controller.
+
+```ts title="src/app/app.use-case.ts" {1,3,6}
+import { Injectable } from "../breakfast-ts/decorators";
+
+@Injectable()
+export class AppUseCase {
+  public execute(): string {
+    return "Hello from the app use case!";
+  }
+}
+```
+
+### The Controller: ```src/app/app.controller.ts```
+
+The controller orchestrates between the route handling and the use-case execution.
+The controller defines methods that handle HTTP requests, and it leverages the AppUseCase to execute specific business logic.
+
+```ts title="src/app/app.controller.ts" {1,3,8,13}
+import { Controller, Get, Post } from "../breakfast-ts/decorators";
+import { AppUseCase } from "./app.use-case";
+
+@Controller("/api")
+export class AppController {
+  constructor(private appUseCase: AppUseCase) {}
+
+  @Get()
+  handleRequest(_req: any, _res: any) {
+    return this.appUseCase.execute();
+  }
+
+  @Post("/data")
+  handlePostRequest(req: any) {
+    console.log(req.body);
+    return "Okay";
+  }
+}
+```
+
+### The Module: ```src/app/app.module.ts```
+
+The module serves as a container that ties together different parts of our application — controllers and use-cases in this case.
+
+```ts title="src/app/app.module.ts" {5-8}
+import { Module } from "../breakfast-ts/decorators";
+import { AppController } from "./app.controller";
+import { AppUseCase } from "./app.use-case";
+
+@Module({
+  usecases: [AppUseCase],
+  controllers: [AppController],
+})
+export class AppModule {}
+```
+
+This modular design ensures scalability and maintainability. Any time you need to add new functionality, it becomes as simple as
+defining new use-cases and controllers and registering them in the module.
+
+### Completing the Main Function
+
+Finally, we update the ```main.ts``` file to use our ```class AppModule{:typescript}```,
+which has the definitions for our use-case and controller. This will bring our whole app to life.
+
+```ts title="src/main.ts" {5}
+import { BreakfastFactory } from "./breakfast-ts";
+import { AppModule } from "./app/app.module";
+
+async function bootstrap() {
+  const app = BreakfastFactory.create(AppModule);
+  await app.listen(3000);
+}
+
+bootstrap();
+```
+
+This is the glue that brings everything together. When you run this ```bootstrap(){:typescript}``` function, your application starts,
+listens on port ```3000{:typescript}```, and is ready to handle incoming requests through the routes defined in your ```class AppController{:typescript}```.
+
+And there we have it — a fully functional, custom-designed TypeScript web application that utilizes advanced features like decorators
+and metadata reflection for a clean, efficient, and organized codebase.
+
+### Let's Test It Out
+
+Running with ```bun run --watch src/main.ts{:bash}``` will start the application, and we already see the logs of our routes being added:
+
+```bash title="terminal"
+🍳🥓☕ Adding route GET /api/
+🍳🥓☕ Adding route POST /api/data
+🦊 Elysia is running on port 3001...
+```
+
+To test your newly created endpoints, we use ```httpie{:bash}``` again.
+
+First, let's test the GET route ```"/api"{:typescript}```. Open a terminal and execute the following command:
+
+```bash title="terminal"
+http :3000/api
+```
+
+You should expect a response that resembles the following:
+
+```http title="response"
+HTTP/1.1 200 OK
+Content-Length: 26
+Date: Sun, 10 Sep 2023 20:47:46 GMT
+content-type: text/plain;charset=utf-8
+
+Hello from the app use case!
+```
+
+This confirms that the GET request is working as expected, returning a message from our use case.
+
+Next, let's move on to the POST route ```"/api/data"{:typescript}```. In the terminal, run:
+
+```bash title="terminal"
+http POST :3000/api/data expresso-plus-bun=success
+```
+
+The server should return a simple ```"Okay"{:typescript}``` message, like so:
+
+```http title="response"
+HTTP/1.1 200 OK
+Content-Length: 5
+Date: Sun, 10 Sep 2023 20:48:10 GMT
+content-type: text/plain;charset=utf-8
+
+Okay
+```
+
+In addition, you should see a console log on your server indicating the POST data, ```{ "expresso-plus-bun": "success" }{:json}```,
+was successfully received and processed.
+
+```bash title="terminal"
+❮ bun run --watch src/main.ts
+🍳🥓☕ Adding route GET /api/
+🍳🥓☕ Adding route POST /api/data
+🦊 Elysia is running on port 3001...
+{
+  "expresso-plus-bun": "success"
+}
+```
+
+These tests verify that your server is properly set up to handle both GET and POST requests. Talk about a brew-tiful success!
+
+---
+
+## Conclusion
+
+In this walkthrough, we embarked on a coding journey that took us through building a TypeScript backend application
+with a new flavor — using Elysia as the foundational framework and enriching it with our custom decorators and modules.
+Our adventure covered various modern concepts such as decorators, reflection, and dependency injection, illustrating how they can be seamlessly integrated to produce a clean, maintainable, and scalable codebase.
+
+We first set up a basic Elysia app with a simple endpoint. From there, we delved into extending Elysia by adding
+CRUD operations for a hypothetical user model. This was just the appetizer. The main course involved creating
+a custom framework, ```"Breakfast-TS"{:ts}```, that leveraged TypeScript's advanced features.
+We crafted decorators to annotate our classes, methods, and properties and used metadata reflection to dynamically bind them to Elysia's core.
+
+This not only simplified our application logic but also opened the doors for more advanced features,
+like dependency injection in Elysia states.
+All of these were stitched together in the final chapter, where we integrated everything we had built into a fully
+functioning backend application. Finally, we tested our server routes to ensure that our application was not just theoretical but a working model.
+
+This guide was intended as a starter pack for those looking to leverage modern TypeScript features in backend development.
+While our example was fairly basic, the principles and patterns we've discussed here are scalable and can be adapted for more complex projects.
+The breakfast analogy wasn't just for fun — it's a reminder that building good software, like a good breakfast,
+requires a mix of the right ingredients.
+
+So what's next? The possibilities are endless.
+You can extend this framework with more complex use cases, implement a database, or even integrate it with front-end technologies.
+The world — or in this case, the kitchen — is your oyster.
+
+So go ahead, fork this code, and let's cook up some more amazing projects together.
+Hungry for more? Check out the Call to Action at the end of this post and join us at ExpressoTS.
+A balanced coding breakfast is the best way to start your day, wouldn't you agree? 🍳🥓☕
+
+## Call to Action
+
+If you found this guide insightful and you're buzzing with ideas on how to extend it, we'd love for you to get involved! We've only scratched the surface of what's possible, and there's a multitude of exciting features and optimizations that could make this experiment even more powerful.
+
+1. **Extend The Framework**: Feel free to clone the repository, add features, or fix bugs. Your contributions are not just welcomed; they're eagerly anticipated.
+
+2. **Bun Integration**: If you're interested in the bun integration, we would be thrilled to see you contribute to [ExpressoTS core](https://github.com/expresso-ts/expresso-ts). File an issue, make a pull request, or engage in the discussions. Your insights could be the missing puzzle piece in making this integration smooth and powerful.
+
+3. **Join The Community**: Last but not least, if you want to be part of a community of like-minded developers, we have a space for you. Jump into our [Discord server](https://discord.com/invite/PyPJfGK) to discuss ideas, ask questions, or just chat about TypeScript, Elysia, and all things coding.
+
+By contributing, you're not just enhancing a project; you're joining a community of developers who are passionate about pushing TypeScript's capabilities to the limit. Let's build, learn, and grow together.
+
+So, what are you waiting for? Let's turn this experiment into an evolution. See you on GitHub and Discord! 🚀👨‍💻👩‍💻
