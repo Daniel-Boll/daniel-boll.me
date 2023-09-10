@@ -11,7 +11,10 @@ import convertAsteriskToStrongTag from "@/utils/convertAsteriskToStrongTag";
 import presentation from "@/data/presentation";
 import projects from "@/data/projects";
 
-const posts = await getCollection("posts");
+const allPosts = await getCollection("posts");
+
+const posts = allPosts.filter((post) => !post.data.planned);
+const plannedPosts = allPosts.filter((post) => post.data.planned);
 ---
 
 <Layout title="Daniel Boll">
@@ -20,8 +23,12 @@ const posts = await getCollection("posts");
       <header>
         <div class="flex flex-row gap-1">
           <h1 class="text-3xl text-neutral-100">{"Hi, I’m"}</h1>
-          <h1 class="text-3xl font-extrabold text-neutral-100 text-transparent bg-clip-text bg-gradient-to-br from-primary-400 to-secondary-600">{"<Daniel::Boll>"}</h1>
-          <p class="text-3xl wave">👋</p>
+          <h1
+            class="bg-gradient-to-br from-primary-400 to-secondary-600 bg-clip-text text-3xl font-extrabold text-neutral-100 text-transparent"
+          >
+            {"<Daniel::Boll>"}
+          </h1>
+          <p class="wave text-3xl">👋</p>
         </div>
         <h2 class="text-xl text-secondary-500">ダーニエル</h2>
       </header>
@@ -68,6 +75,42 @@ const posts = await getCollection("posts");
                   slug={post.slug}
                 />
               ))
+        }
+      </section>
+    </article>
+
+    <article class="flex flex-col gap-8">
+      <header class="flex w-full flex-row justify-between gap-2">
+        <h3 class="text-lg text-neutral-100">Planned posts</h3>
+        <Link href="/planned" label="See my plans" isUnderline target="_self" />
+      </header>
+      {posts.length === 0 && <p>Soon, stay connected 👀...</p>}
+
+      <section class="flex flex-col gap-4 md:flex-row md:flex-wrap">
+        {
+          plannedPosts.length !== 0 ? (
+            plannedPosts
+              .slice(0, 4)
+              .map((post) => (
+                <FeaturedPostCard
+                  publishedAt={post.data.publishedAt}
+                  title={post.data.title}
+                  description={post.data.description}
+                  slug={post.slug}
+                  planned={post.data.planned}
+                />
+              ))
+          ) : (
+            <p>
+              No planned posts for a while, if you have any idea, please{" "}
+              <Link
+                href={`mailto:${presentation.mail}`}
+                label="contact me"
+                class="text-orange-500"
+              />
+              .
+            </p>
+          )
         }
       </section>
     </article>

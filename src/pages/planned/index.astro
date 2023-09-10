@@ -1,0 +1,16 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import PostsLists from "@/components/post/PostsList.astro";
+
+const posts = (await getCollection("posts")).filter(
+  (post) => post.data.planned
+);
+---
+
+<Layout title="Planned Posts">
+  <main class="slide-enter-content flex flex-col gap-8">
+    <h1 class="font-sans text-2xl leading-8 text-neutral-100">Planned Posts</h1>
+    <PostsLists posts={posts} />
+  </main>
+</Layout>

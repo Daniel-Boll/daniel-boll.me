@@ -5,7 +5,7 @@ slug: "til-double-shebang"
 tags: ["bash", "shell", "history-expansion"]
 ---
 
-Somewhere around 2020, I learned about the ```!!{:bash}``` command in bash. This command is a part of history expansion in bash, and it allows you to repeat the last command that was executed. It can be particularly useful when you forget to run a command with the necessary permissions and want to rerun it with, for example, ```sudo{:bash}```.
+Somewhere around 2020, I learned about the `!!{:bash}` command in bash. This command is a part of history expansion in bash, and it allows you to repeat the last command that was executed. It can be particularly useful when you forget to run a command with the necessary permissions and want to rerun it with, for example, `sudo{:bash}`.
 
 ### Example:
 
@@ -18,4 +18,4 @@ sudo -E !!
 # This will rerun the previous command with sudo, i.e., 'sudo -E nvim /etc/nginx/conf.d/*.conf'
 ```
 
-This can save time and reduce the risk of typing errors. The ```!!{:bash}``` command can be a handy addition to your bash toolkit!
+This can save time and reduce the risk of typing errors. The `!!{:bash}` command can be a handy addition to your bash toolkit!

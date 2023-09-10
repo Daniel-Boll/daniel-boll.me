@@ -1,5 +1,5 @@
 ---
-import 'odometer/themes/odometer-theme-default.css';
+import "odometer/themes/odometer-theme-default.css";
 
 import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
@@ -11,7 +11,7 @@ import { Odometer } from "@/components/odometer";
 import formatDate from "@/utils/formatDate";
 import { getOgImagePath } from "@/utils/open-graph/image-path";
 import Eye from "@/utils/icons/eye.astro";
-import TOC from '@/components/post/TOC.astro';
+import TOC from "@/components/post/TOC.astro";
 
 export const prerender = true;
 
@@ -22,7 +22,9 @@ type Props = {
 } & Post;
 
 export async function getStaticPaths() {
-  const posts = await getCollection("posts");
+  const posts = (await getCollection("posts")).filter(
+    (post) => !post.data.planned
+  );
 
   return posts.map((post) => ({
     params: { slug: post.slug },
@@ -30,70 +32,73 @@ export async function getStaticPaths() {
   }));
 }
 
-const { 
-  data: {
-    title, 
-    publishedAt, 
-    description,
-    cover,
-    coverAlt,
-    from,
-    to
-  }, 
+const {
+  data: { title, publishedAt, description, cover, coverAlt },
   render,
-  slug
+  slug,
 } = Astro.props;
 
-const { Content, remarkPluginFrontmatter: { readingTime }, headings } = await render();
+const {
+  Content,
+  remarkPluginFrontmatter: { readingTime },
+  headings,
+} = await render();
 
 const og = {
   title: title,
   description: description,
   image: new URL(getOgImagePath(Astro.url.pathname), Astro.url.origin).href,
-}
+};
 
 const viewsAPI = await fetch(`${Astro.url.origin}/api/view/${slug}`, {
-  method: "POST"
+  method: "POST",
 });
 const { views } = await viewsAPI.json().catch(() => ({ views: 0 }));
 ---
+
 <Layout title={title} og={og}>
   <div class="gap-10 lg:flex lg:items-start">
     {!!headings.length && <TOC headings={headings} />}
-    <main class="post mx-auto flex w-full min-w-prose flex-col gap-4">
-      <div class="md:flex space-x-10">
-        <div class="w-full">
-          <div class="not-prose">
-            {cover && coverAlt && <Image class="my-10 mb-1 rounded-xl" src={cover} alt={coverAlt} sizes="680" />}
-          </div>
-        </div>
-      </div>
+    <main class="post min-w-prose mx-auto flex w-full flex-col gap-4">
       <header role="presentation">
-        <!-- <h1  -->
-        <!--   transition:name="post-title"  -->
-        <!--   class:list={[ -->
-        <!--     "text-lg font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-br", -->
-        <!--     `from-${from ? from : 'gray-100'}`, -->
-        <!--     `to-${to ? to : 'gray-800'}` -->
-        <!--   ]}> -->
-        <!--   {title} -->
-        <!-- </h1> -->
-        <h1 
-          transition:name="post-title" 
-          class={"text-lg font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-br from-sky-300 to-sky-800"}>
+        <h1
+          transition:name="post-title"
+          class={"text-lg font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-br from-sky-300 to-sky-800"}
+        >
           {title}
         </h1>
-        <p class="italic text-center">{description} - {formatDate(publishedAt)}</p>
-        <div class="flex flex-row gap-1 items-center text-sm text-gray-500">
+        <p class="text-center italic">
+          {description} - {formatDate(publishedAt)}
+        </p>
+        <div class="flex flex-row items-center gap-1 text-sm text-gray-500">
           <p class="text-sm text-gray-500">{readingTime}</p>
-          <Eye /> <Odometer client:only quantity={views} /> views
+          <Eye />
+          <Odometer client:only quantity={views} /> views
+        </div>
+        <hr class="my-4" />
+        <div class="space-x-10 md:flex">
+          <div class="w-full">
+            <div class="not-prose">
+              {
+                cover && coverAlt && (
+                  <Image
+                    class="mb-1 rounded-xl"
+                    src={cover}
+                    alt={coverAlt}
+                    sizes="380"
+                  />
+                )
+              }
+            </div>
+          </div>
         </div>
       </header>
 
-      <div class="post mx-auto flex w-full min-w-prose flex-col gap-4 slide-enter-content">
+      <div
+        class="post min-w-prose slide-enter-content mx-auto flex w-full flex-col gap-4"
+      >
         <Content />
       </div>
-
     </main>
   </div>
   <CommentSection />

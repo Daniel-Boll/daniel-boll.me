@@ -72,6 +72,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+hr {
+  @apply border-zinc-700;
+}
+
 pre {
   @apply !px-0 rounded-lg;
 }

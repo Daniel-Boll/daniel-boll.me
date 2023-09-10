@@ -305,7 +305,7 @@ def extract_features_from_contours(contours, image_path, step):
   As we can see only when we are training the model we do know the classes.
 </Trivia>
 
-## Feature Serialization: Storing the Leafy Knowledge 
+## Feature Serialization: Storing the Leafy Knowledge
 
 Once we have successfully extracted the critical features from our leaf dataset, the next step is to serialize and store this data. Serializing our dataset converts it into a format that can be easily saved to disk and subsequently loaded back when needed. For this purpose, we use a powerful Python library known as `joblib`.
 
@@ -322,7 +322,6 @@ def load_features():
 ```
 
 And just like that, our feature extraction process is complete! We've successfully isolated our leaves, extracted meaningful features from them, and stored these features for future use.
-
 
 ## Model Training: Teaching our AI to Understand Leaves
 
@@ -399,7 +398,9 @@ The model training process involves a few steps:
 - The model is then trained using the fit method, and we finally save our trained model to a file named model.pkl for future use.
 
 <Trivia emoji="🚜">
-  The beauty of coding isn't just about creating intricate and aesthetically pleasing lines of code. It's about getting the job done, and our humble piece of training code does just that – efficiently, and effectively!
+  The beauty of coding isn't just about creating intricate and aesthetically
+  pleasing lines of code. It's about getting the job done, and our humble piece
+  of training code does just that – efficiently, and effectively!
 </Trivia>
 
 ## Classification: Bringing the AI to Life with Labels
@@ -409,6 +410,7 @@ The model training chapter has been a roller coaster, and now we have a trained 
 Here's how the magic unfolds:
 
 ### Loading the Trained Model
+
 First, we load our previously saved MLP model from the disk.
 
 ```python
@@ -416,6 +418,7 @@ mlp = load("model.pkl")
 ```
 
 ### Preparing the Features
+
 We loop through the files, extract the features, and construct our feature matrix `X` just like we did in the training process.
 
 ```python
@@ -438,6 +441,7 @@ for file in files:
 ```
 
 ### Scaling and Prediction
+
 The features are then standardized, and the MLP model predicts the classes along with the probabilities for each class.
 
 ```python
@@ -451,6 +455,7 @@ probabilities = mlp.predict_proba(X)
 ```
 
 ### Labeling the Images
+
 The predictions and probabilities are then used to annotate the original images with labels. The bounding rectangles and labels are drawn on the images.
 
 ```python
@@ -501,7 +506,9 @@ cv2.imwrite("classified/" + file.split("/")[-1], image)
 The result is an image where each leaf is labeled with its corresponding class and confidence score.
 
 <Trivia emoji="🍃">
-  The classification step is where the AI showcases its intelligence, turning raw data into insights. It is the final piece that completes the puzzle, letting us see the leaves through the lens of our intelligent algorithm.
+  The classification step is where the AI showcases its intelligence, turning
+  raw data into insights. It is the final piece that completes the puzzle,
+  letting us see the leaves through the lens of our intelligent algorithm.
 </Trivia>
 
 <Image

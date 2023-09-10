@@ -43,6 +43,16 @@ const notInHome = pathname !== "/";
       <li>/</li>
       <li>
         <a
+          href="/planned"
+          class:list={{
+            ["hover:text-neutral-100"]: true,
+            ["text-neutral-100"]: pathname === "/planned",
+          }}>Plans</a
+        >
+      </li>
+      <li>/</li>
+      <li>
+        <a
           href="/til"
           class:list={{
             ["hover:text-neutral-100"]: true,

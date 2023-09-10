@@ -5,6 +5,8 @@ description: "The Developer-Friendly TypeScript Framework for Server-Side Applic
 slug: "a-first-project-with-expressots"
 from: "green-100"
 to: "green-800"
+cover: "src/assets/posts/03/expressots-discord-banner-darkbg.png"
+coverAlt: "ExpressoTS Banner"
 ---
 
 import Trivia from "@/components/mdx/Trivia.astro";
@@ -37,7 +39,7 @@ pnpx @expressots/cli new expressots-first-project
 
 ### Configuration Wizard
 
-After running the command, you're greeted by a friendly (albeit text-based) wizard 🧙‍♂️. 
+After running the command, you're greeted by a friendly (albeit text-based) wizard 🧙‍♂️.
 
 ```bash title="terminal"
 [🐎 Expressots]
@@ -60,7 +62,7 @@ So you've set up your new ExpressoTS project. Awesome! Time to get inside the en
 cd expressots-first-project
 ```
 
-You're now in the root folder, and if you're curious about what comes packed by default, run a quick ```tree{:bash}``` command.
+You're now in the root folder, and if you're curious about what comes packed by default, run a quick `tree{:bash}` command.
 
 ```bash title="terminal"
 @expressots/tests/expressots-first-project via  v16.19.0
@@ -152,14 +154,14 @@ You've been through the house tour, you've feng shui'd your `.prettierrc` and go
 
 ### Using HTTPie for Your First GET Request
 
-For this demonstration, we're going to use [HTTPie](https://httpie.io/) — the ```cURL{:bash}``` for the 21st century. But like, way more readable. Here's how to send your first GET request to `http://localhost:3000`.
+For this demonstration, we're going to use [HTTPie](https://httpie.io/) — the `cURL{:bash}` for the 21st century. But like, way more readable. Here's how to send your first GET request to `http://localhost:3000`.
 
 ```bash title="terminal"
 @expressots/tests/expressots-first-project via  v16.19.0
 ❯ http :3000
 ```
 
-*Bam!* You should see a response like:
+_Bam!_ You should see a response like:
 
 ```bash title="terminal"
 HTTP/1.1 200 OK
@@ -171,7 +173,7 @@ Hello Expresso TS!
 
 ## Anatomy of the "Hello Expresso TS!" 🦴
 
-Alright, let's dissect that ```"Hello Expresso TS!"{:json}``` message. How does this simple string pass through layers of TypeScript files to make it to your browser? Spoiler: _It's not magic; it's just well-structured code._
+Alright, let's dissect that `"Hello Expresso TS!"{:json}` message. How does this simple string pass through layers of TypeScript files to make it to your browser? Spoiler: _It's not magic; it's just well-structured code._
 
 ### The Starting Point: **src/main.ts**
 
@@ -219,10 +221,15 @@ export { AppModule };
 
 ### The Controller: **src/app.controller.ts**
 
-This is the conductor of our orchestra. It's responsible for handling HTTP requests and directing traffic. In this case, it's just saying, ```"Hello Expresso TS!"{:json}```.
+This is the conductor of our orchestra. It's responsible for handling HTTP requests and directing traffic. In this case, it's just saying, `"Hello Expresso TS!"{:json}`.
 
 ```ts title="src/app.controller.ts"
-import { BaseController, controller, httpGet, response } from "inversify-express-utils";
+import {
+  BaseController,
+  controller,
+  httpGet,
+  response,
+} from "inversify-express-utils";
 import { Response } from "express";
 import { AppUseCase } from "./app.usecase";
 
@@ -241,7 +248,7 @@ class AppController extends BaseController {
 
 ### The Use Case: **src/app.usecase.ts**
 
-Here's where the actual ```"Hello Expresso TS!"{:json}``` lives.
+Here's where the actual `"Hello Expresso TS!"{:json}` lives.
 
 ```ts title="src/app.usecase.ts" {6}
 import { provide } from "inversify-binding-decorators";
@@ -256,11 +263,11 @@ class AppUseCase {
 
 ## "Hello, Who?" Changing the Default Response 🖊️
 
-Got bored of the usual ```"Hello Expresso TS!"{:json}```? Let's give it a personal touch. To do that, we only need to venture into the `src/app.usecase.ts` file. See, this is the beauty of a well-structured codebase; you don't have to jump through hoops to make a simple change.
+Got bored of the usual `"Hello Expresso TS!"{:json}`? Let's give it a personal touch. To do that, we only need to venture into the `src/app.usecase.ts` file. See, this is the beauty of a well-structured codebase; you don't have to jump through hoops to make a simple change.
 
 ### The Tweak: **src/app.usecase.ts**
 
-One line change. That's it. Here we just swap out the text to ```"Hello from <Daniel::Boll>"{:json}```.
+One line change. That's it. Here we just swap out the text to `"Hello from <Daniel::Boll>"{:json}`.
 
 ```ts title="src/app.usecase.ts" {4}
 @provide(AppUseCase)
@@ -294,7 +301,7 @@ Great, we're diving into environment-specific configuration! This makes the appl
 
 ### Port Configuration in **src/main.ts**
 
-We modify the ```AppInstance.listen(){:ts}``` method to get the port from the environment variable `PORT`. If `PORT` is not available, it defaults to ```3000{:ts}```.
+We modify the `AppInstance.listen(){:ts}` method to get the port from the environment variable `PORT`. If `PORT` is not available, it defaults to `3000{:ts}`.
 
 ```ts title="src/main.ts" {7,10}
 import "reflect-metadata";
@@ -307,7 +314,7 @@ async function bootstrap() {
   AppInstance.create(container);
   AppInstance.listen(
     Number(process.env.PORT) ?? 3000,
-    ServerEnvironment.Development,
+    ServerEnvironment.Development
   );
 }
 
@@ -316,7 +323,7 @@ bootstrap();
 
 ### Environment Checks
 
-Adding ```Environments.checkAll();{:ts}``` ensures that our environment is sound before the application starts. This is a proactive approach, helping to catch issues early.
+Adding `Environments.checkAll();{:ts}` ensures that our environment is sound before the application starts. This is a proactive approach, helping to catch issues early.
 
 ### Feedback on Missing `.env` and Variables
 
@@ -334,7 +341,7 @@ When you don't provide the `.env` file or the `PORT` variable, ExpressoTS kindly
 
 ### Verify New Port
 
-Finally, when the server restarts, it picks up the `PORT` value from `.env`. As expected, the server now runs on port ```3001{:ts}```.
+Finally, when the server restarts, it picks up the `PORT` value from `.env`. As expected, the server now runs on port `3001{:ts}`.
 
 ```bash title="terminal" /3001/#g
 [INFO] ts-node-dev ver. 2.0.0 (using ts-node ver. 10.9.1, typescript ver. 4.9.5)
@@ -486,12 +493,12 @@ class CreateController extends BaseController {
   @httpPost("/")
   execute(
     @requestBody() payload: ICreateRequestDTO,
-    @response() res: Response,
+    @response() res: Response
   ): ICreateResponseDTO {
     return this.callUseCase(
       this.createUseCase.execute(payload),
       res,
-      StatusCode.OK,
+      StatusCode.OK
     );
   }
 }
@@ -541,6 +548,7 @@ First attempt at creating a user:
 ```bash title="terminal"
 ❯ http POST :3000/user/create name=John age=20
 ```
+
 ```json
 {
   "age": "20",
@@ -554,6 +562,7 @@ Second attempt fails as expected:
 ```bash
 ❯ http POST :3000/user/create name=John age=20
 ```
+
 ```json
 {
   "error": "User already exists"
@@ -562,6 +571,6 @@ Second attempt fails as expected:
 
 ### Wrapping Up 🎉
 
-Although this approach may not align 100% with best practices, it provides a functional example. The ***Opinionated Architecture*** extends this example into a more robust setup, which includes repositories, entities, and more.
+Although this approach may not align 100% with best practices, it provides a functional example. The **_Opinionated Architecture_** extends this example into a more robust setup, which includes repositories, entities, and more.
 
 Thanks for following along! Hope this was insightful and stay tuned for more! 👋
