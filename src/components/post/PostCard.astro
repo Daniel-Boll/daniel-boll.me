@@ -31,7 +31,7 @@ const isPlanned = post.data.planned;
   href={post.data.planned ? null : `/posts/${post.slug}`}
 >
   <div class="flex w-full items-center justify-between">
-    <h2 transition:name="post-title" class="text-lg">{post.data.title}</h2>
+    <h2 class="text-lg">{post.data.title}</h2>
 
     <div class="flex flex-row items-center gap-4">
       {

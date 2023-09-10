@@ -62,7 +62,6 @@ const { views } = await viewsAPI.json().catch(() => ({ views: 0 }));
     <main class="post min-w-prose mx-auto flex w-full flex-col gap-4">
       <header role="presentation">
         <h1
-          transition:name="post-title"
           class={"text-lg font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-br from-sky-300 to-sky-800"}
         >
           {title}
