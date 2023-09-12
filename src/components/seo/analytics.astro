@@ -1,0 +1,20 @@
+---
+const tagId = import.meta.env.GTAG;
+---
+
+<Fragment>
+  <!-- Google tag (gtag.js) -->
+  <script
+    type="text/partytown"
+    src=`https://www.googletagmanager.com/gtag/js?id=${tagId}`
+  ></script>
+  <script type="text/partytown" define:vars={{ tagId: tagId }}>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+
+    gtag("config", tagId);
+  </script>
+</Fragment>

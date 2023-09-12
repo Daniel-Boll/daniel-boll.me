@@ -1,7 +1,8 @@
 ---
 import { SEO } from "astro-seo";
 import { SITE_URL } from "@/data/config";
-import { ViewTransitions } from "astro:transitions"
+import { ViewTransitions } from "astro:transitions";
+import Analytics from "./analytics.astro";
 
 type Props = {
   title?: string;
@@ -73,4 +74,5 @@ const openGraph = {
   />
   <link rel="sitemap" href="/sitemap-index.xml" />
   <ViewTransitions />
+  <Analytics />
 </head>
