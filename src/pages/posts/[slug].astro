@@ -49,11 +49,6 @@ const og = {
   description: description,
   image: new URL(getOgImagePath(Astro.url.pathname), Astro.url.origin).href,
 };
-
-const viewsAPI = await fetch(`${Astro.url.origin}/api/view/${slug}`, {
-  method: "POST",
-});
-const { views } = await viewsAPI.json().catch(() => ({ views: 0 }));
 ---
 
 <Layout title={title} og={og}>
@@ -72,7 +67,7 @@ const { views } = await viewsAPI.json().catch(() => ({ views: 0 }));
         <div class="flex flex-row items-center gap-1 text-sm text-gray-500">
           <p class="text-sm text-gray-500">{readingTime}</p>
           <Eye />
-          <Odometer client:only quantity={views} /> views
+          <Odometer client:only slug={slug} update /> views
         </div>
         <hr class="my-4" />
         <div class="space-x-10 md:flex">
