@@ -16,6 +16,10 @@ export interface Props {
 
 const { post } = Astro.props;
 
+const viewsAPI = await fetch(`${Astro.url.origin}/api/view/${post.slug}`, {
+  method: "GET",
+});
+const { views } = await viewsAPI.json().catch(() => ({ views: 0 }));
 const isPlanned = post.data.planned;
 ---
 
@@ -71,7 +75,7 @@ const isPlanned = post.data.planned;
         <Upvote client:only slug={post.slug} />
       ) : (
         <>
-          <Eye /> <Odometer client:only slug={post.slug} /> views
+          <Eye /> <Odometer client:only data={views} /> views
         </>
       )
     }
