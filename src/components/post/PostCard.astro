@@ -75,7 +75,7 @@ const isPlanned = post.data.planned;
         <Upvote client:only slug={post.slug} />
       ) : (
         <>
-          <Eye /> <Odometer client:only quantity={views} /> views
+          <Eye /> <Odometer client:only data={views} /> views
         </>
       )
     }

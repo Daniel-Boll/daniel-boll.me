@@ -42,12 +42,12 @@ export const Upvote = ({ slug }: { slug: string }) => {
         ref={upvoteBtnRef}
         onClick={handleUpvote}
         data-disabled={checkUpvoted()}
-        className="rounded bg-neutral-800 px-2 py-1 font-bold text-white hover:bg-neutral-700 hover:cursor-pointer disabled:bg-neutral-900 disabled:hover:cursor-not-allowed"
+        className="rounded bg-neutral-800 px-2 py-1 font-bold text-white hover:cursor-pointer hover:bg-neutral-700 disabled:bg-neutral-900 disabled:hover:cursor-not-allowed"
       >
         Upvote
       </button>
       <span className="ml-2">
-        <Odometer quantity={count} />
+        <Odometer data={count} />
       </span>
     </div>
   );
