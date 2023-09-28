@@ -2,9 +2,15 @@ export interface OgData {
   title: string;
   description: string;
   date: Date;
+  tags?: string[];
 }
 
-export const OpenGraphTemplate = ({ title, description, date }: OgData) => (
+export const OpenGraphTemplate = ({
+  title,
+  description,
+  date,
+  tags,
+}: OgData) => (
   <div
     style={{
       display: "flex",
@@ -30,8 +36,7 @@ export const OpenGraphTemplate = ({ title, description, date }: OgData) => (
       style={{
         color: "white",
         alignSelf: "center",
-        margin: 0,
-        fontSize: "",
+        fontSize: "25px",
       }}
     >
       {title}
@@ -40,11 +45,39 @@ export const OpenGraphTemplate = ({ title, description, date }: OgData) => (
       style={{
         color: "grey",
         alignSelf: "center",
-        fontSize: "20px",
+        fontSize: "18px",
       }}
     >
       {description}
     </p>
+    {tags && tags.length > 0 && (
+      <ul
+        style={{
+          color: "white",
+          display: "flex",
+          gap: "8",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
+        {tags.map((tag) => (
+          <li
+            style={{
+              backgroundColor: "grey",
+              borderRadius: "18px",
+              padding: "4px",
+              fontSize: "16px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {tag}
+          </li>
+        ))}
+      </ul>
+    )}
     <p style={{ color: "white", fontSize: "12px" }}>
       {date.toLocaleDateString("en-US", {
         year: "numeric",

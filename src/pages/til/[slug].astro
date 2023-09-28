@@ -4,6 +4,7 @@ import type { CollectionEntry } from "astro:content";
 
 import Layout from "@/layouts/Layout.astro";
 import CommentSection from "@/components/post/Utterances.astro";
+import { getOgImagePath } from "@/utils/open-graph/image-path";
 
 export const prerender = true;
 
@@ -22,60 +23,46 @@ type Props = {
   readingTime: string;
 } & Til;
 
-const { 
-  data: {
-    title, 
-    tags
-  }, 
+const {
+  data: { title, tags },
   render,
 } = Astro.props;
 
-
-export const getOgImagePath = (filename: string = "Default Value") => {
-  if (filename.startsWith("/")) filename = filename.substring(1);
-
-  if (filename.endsWith("/"))
-    filename = filename.substring(0, filename.length - 1);
-
-  if (filename === "") filename = "Default Value";
-
-  return `./open-graph/${filename}.png`;
+const og = {
+  title: "Today I Learned",
+  description: title,
+  image: new URL(getOgImagePath(Astro.url.pathname), Astro.url.origin).href,
 };
 
-const ogImage = new URL(getOgImagePath(Astro.url.pathname), Astro.url.origin)
-  .href;
-
-const { Content, remarkPluginFrontmatter: { readingTime } } = await render();
-
-
-const og = {
-  title: title,
-  description: `TIL: ${title}`,
-  image: ogImage,
-}
+const {
+  Content,
+  remarkPluginFrontmatter: { readingTime },
+} = await render();
 ---
 
 <Layout title={title} og={og}>
   <main class="post mx-auto flex w-full min-w-prose flex-col gap-4">
     <header role="presentation">
-      <h1 class="text-lg font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-br from-sky-300 to-sky-800">
+      <h1
+        class="text-lg font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-br from-sky-300 to-sky-800"
+      >
         TIL: {title}
       </h1>
       {
         tags && (
           <div class="flex flex-row justify-center gap-2">
-            {
-              tags.map((tag) => (
-                <span class="text-sm text-gray-500">{tag}</span>
-              ))
-            }
+            {tags.map((tag) => (
+              <span class="text-sm text-gray-500">{tag}</span>
+            ))}
           </div>
         )
       }
       <p class="text-sm text-gray-500">{readingTime}</p>
     </header>
 
-    <div class="post mx-auto flex w-full min-w-prose flex-col gap-4 slide-enter-content">
+    <div
+      class="post mx-auto flex w-full min-w-prose flex-col gap-4 slide-enter-content"
+    >
       <Content />
     </div>
 

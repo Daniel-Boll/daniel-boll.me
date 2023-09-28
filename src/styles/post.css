@@ -3,7 +3,8 @@
 }
 
 .post code {
-  @apply rounded-md bg-black px-1 py-[2px] text-red-500;
+  @apply rounded-md bg-black font-semibold px-1 py-[2px] text-orange-500;
+  @apply max-w-[600px] overflow-x-auto;
 }
 
 .post h1 {
@@ -18,12 +19,20 @@
   @apply mt-4 text-xl text-neutral-100 font-bold;
 }
 
+.post h4 {
+  @apply mt-4 text-lg text-neutral-100 font-bold;
+}
+
 .post a {
-  @apply text-neutral-100 no-underline;
+  @apply text-neutral-100 underline;
+}
+
+.post b {
+  @apply font-extrabold text-white;
 }
 
 .post strong {
-  @apply text-orange-500;
+  @apply bg-zinc-800 text-white px-2 py-1 rounded-md;
 }
 
 .post ul {

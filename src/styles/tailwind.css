@@ -1,13 +1,16 @@
 @tailwind base;
 @layer base {
-	html {
-		&.dark {
-			@apply text-gray-200;
-      header, footer {
+  html {
+    zoom: 125%;
+
+    &.dark {
+      @apply text-gray-200;
+      header,
+      footer {
         @apply text-gray-400 border-gray-700;
       }
-		}
-	}
+    }
+  }
 }
 @tailwind components;
 @tailwind utilities;

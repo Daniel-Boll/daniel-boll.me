@@ -8,10 +8,12 @@ export const generateOgImage = async ({
   title,
   description,
   date,
+  tags,
 }: {
   title: string;
   description: string;
   date: Date;
+  tags: string[];
 }): Promise<Buffer> => {
   const options: SatoriOptions = {
     width: 600,
@@ -38,6 +40,7 @@ export const generateOgImage = async ({
       title,
       description,
       date,
+      tags,
     }),
     options
   );
