@@ -1,0 +1,1039 @@
+---
+title: "Mastering Native Node.js Addons with node-addon-api: A Comprehensive Guide"
+publishedAt: 2023-09-25
+description: "Learn how to build native Node.js addons effortlessly using node-addon-api, from basic setup to basic OpenCV functionalities."
+slug: "going-native-on-javascript-2"
+seriesId: "going-native-on-javascript"
+orderInSeries: 2
+---
+
+import SeeAlso from "@/components/mdx/SeeAlso.astro";
+import Trivia from "@/components/mdx/Trivia.astro";
+
+<details>
+
+<summary>Disclaimer ⚠️</summary>
+
+> The topic of creating native Node.js modules and working with C++ bindings is intricate,
+> and while great care has been taken to ensure the accuracy of this blog post, there might be some
+> inadvertent errors or oversights. The world of native modules is complex, and the documentation can sometimes be heavy to digest.
+> If you notice any inaccuracies or have suggestions for improvement, please feel free to reach out to me directly or address it
+> in the comments section below. Your input is highly valuable, not just for me but for everyone else looking to expand their knowledge in this area.
+> 🙇‍♂
+
+</details>
+
+## Introduction
+
+Welcome to the second installment of our deep dive into native Node.js modules! If you've been following along, you've already learned the basics of
+what native modules are, how they work, and why they are such a vital part of the Node.js ecosystem. If you missed it, you might want to
+check out the first post in the series: ```"Unlocking the Power of Native Modules in JavaScript: An Introductory Guide"{:javascript}```
+
+<SeeAlso slug="going-native-on-javascript-1" />
+
+Today, we're rolling up our sleeves to get into the nitty-gritty: **building a real-world native module from scratch**.
+But we're not just going to build any module — we're creating a ```"Fast Image Resizer"{:javascript}``` using `C++` and integrating
+it into a `Node.js` application. The primary objective here is to offer a hands-on demonstration of the performance benefits
+that native modules can bring to computationally intensive tasks.
+
+Now, you might be asking, ```"Why image resizing?"{:javascript}``` The answer lies in its practical applicability and the
+intense computation it demands, making it a perfect case study for native modules. JavaScript alone can be painfully slow
+for such operations, giving us an excellent backdrop against which to showcase the raw speed of a native module.
+By the end of this post, you'll not only have a fully functional image resizer but also a robust understanding of node-gyp,
+the build tool that turns our C++ code into a native Node.js module.
+
+Here's what we'll cover:
+- Setting up your development environment to use node-gyp.
+- Writing the C++ code that will form the core of our Fast Image Resizer.
+- Crafting the essential `binding.gyp` file, the blueprint for our native module.
+- Building the module and integrating it into a Node.js application.
+- Troubleshooting and overcoming common challenges.
+
+<Trivia emoji="☕">
+So grab a cup of coffee, fire up your code editor, and let's get building!
+</Trivia>
+
+## Setting the Stage: Tools and Environment Setup 🛠️
+
+Before diving into the code, it's essential to ensure that our development environment is well-equipped with the tools we'll be using
+throughout this hands-on tutorial. The right tools not only make the development process smoother but also allow us to focus more on
+coding and less on fixing environment-related issues. Here, we'll cover how to set up everything you need, based on the operating system you're using.
+
+### The Tools You'll Need 🛠️
+
+Here's a list of tools that you'll require for developing native Node.js modules:
+
+- **Node.js**: To run your JavaScript code.
+- **npm**: For package management and distribution.
+- **C/C++ Development Tools**: For writing native code.
+- **Python**: Required by node-gyp.
+
+- **Node and npm**
+
+Ensure you have Node.js and npm installed on your machine. If you haven't, download the appropriate installer from
+[Node.js website](https://nodejs.org/). It's recommended to use the LTS (Long Term Support) version for stability.
+The installer will also include npm.
+
+```bash title="Terminal"
+# Verify Node and npm installation
+node --version
+npm --version
+```
+
+<Trivia emoji="🥸">
+  I will actually be using `pnpm` as a personal preference. You can use `npm` or `yarn` as well. (Or even bun 🍞 if you are feeling adventurous!)
+</Trivia>
+
+- **C/C++ Development Tools and Python**
+
+The requirements for C/C++ development tools and Python differ based on your operating system:
+
+- **Windows**: Use npm to install `windows-build-tools` which includes the required C/C++ compilers and Python.
+    ```bash title="Terminal"
+    npm install --global --production windows-build-tools
+    ```
+
+- **Mac**: Use `xcode-select` to install the necessary C/C++ tools.
+    ```bash title="Terminal"
+    xcode-select --install
+    ```
+    _Python usually comes pre-installed on macOS._
+
+- **Linux**: The required C/C++ and Python tools are generally pre-installed. If not, consult your distribution's package manager for installation.
+
+```bash title="Terminal"
+# Verify Python installation
+python --version
+
+# Verify C/C++ compiler
+cc --version
+
+# Verify make utility
+make --version
+```
+
+- **Other Tools**
+
+You'll also need a shell program and a code editor of your choice. macOS and Linux generally come with a shell pre-installed.
+For Windows, you might consider using PowerShell.
+
+### Initializing Your Project 🚀
+
+Create a new directory for your project and initialize it with pnpm:
+
+```bash title="Terminal"
+mkdir fast-image-resizer
+cd fast-image-resizer
+pnpm init # npm init -y
+```
+
+This action will generate a `package.json` file, your project's manifest.
+
+### Setting Up node-gyp 🛠️🔧
+Before we dive into the actual setup, it's crucial to understand what node-gyp is and why it's an essential tool for native
+Node.js module development. Node-gyp is a build automation tool used to compile native addon modules for Node.js.
+It provides a cross-platform interface for native module compilation and takes care of the heavy lifting around configuring
+the build environment for various operating systems. Node-gyp uses `binding.gyp` files written in JSON format to describe
+the configuration for building your native addons.
+
+Now that you have an idea of what node-gyp is, let's get it set up so we can proceed with creating a native module.
+
+#### Installation 💾
+
+Installing node-gyp is straightforward. You can either install it globally on your machine or as a development dependency in your specific project.
+
+```bash title="Terminal"
+pnpm i -D node-gyp # npm install --save-dev node-gyp
+```
+
+#### Verifying Installation ✅
+
+To ensure that node-gyp is correctly installed, run the following command:
+
+```bash title="Terminal"
+pnpm node-gyp --version # Mine is v9.4.0
+```
+
+If you see the version number displayed, you are good to go.
+
+That's it for the setup! You're now well-equipped to tackle native Node.js module development.
+
+### Your First Native Module: Hello, World! 🌍
+
+Before we start with the actual implementation, let's create a basic ```"Hello, World!"{:javascript}``` native module to get a taste of the process.
+This simple example will demonstrate the basics of setting up, compiling, and importing a native module.
+
+#### The C++ Code 📝
+
+Create a file named `hello.cc` and add the following C++ code:
+
+```cpp title="hello.cc"
+#include <node.h>
+
+void HelloWorld(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  v8::Isolate* isolate = args.GetIsolate();
+  args.GetReturnValue().Set(v8::String::NewFromUtf8(isolate, "Hello, world from C++!").ToLocalChecked());
+}
+
+void Initialize(v8::Local<v8::Object> exports) {
+  NODE_SET_METHOD(exports, "hello", HelloWorld);
+}
+
+NODE_MODULE(NODE_GYP_MODULE_NAME, Initialize)
+```
+
+#### The Binding Configuration 📐
+
+Create a `binding.gyp` file with the following content:
+
+```json title="binding.gyp"
+{
+  "targets": [
+    {
+      "target_name": "hello",
+      "sources": [ "hello.cc" ]
+    }
+  ]
+}
+```
+
+#### Compilation 🔨
+
+Navigate to your project folder and run:
+
+```json title="package.json" {2-4}
+{
+  "scripts": {
+    "build": "node-gyp configure build"
+  }
+}
+```
+
+If everything goes as planned, you should see a `build/` directory containing your compiled native module.
+
+#### Using the Module in Node.js 📦
+
+Finally, let's use this native module in a Node.js script. Create a `test.js` file with the following content:
+
+```javascript title="test.js"
+const addon = require('./build/Release/hello.node');
+console.log(addon.hello());  // Outputs "Hello, world from C++!"
+```
+
+Run the script:
+
+```json title="package.json" {4}
+{
+  "scripts": {
+    "build": "node-gyp configure build",
+    "dev": "node test.js"
+  }
+}
+```
+
+You should see ```"Hello, world from C++!"``` printed to the console. Congratulations, you've just created and used your first native Node.js module!
+
+### Setting Up Language Server Protocol (LSP) 🧝
+
+When developing native modules, it's extremely beneficial to have an IDE or text editor that understands C/C++ for features like IntelliSense, refactoring, and error checking. LSP can help with this, and luckily, we can generate a `compile_commands.json` file to make this happen. Below is a helper script that can automate this process for you. This script is adapted from a [GitHub issue discussion](https://github.com/nodejs/node-gyp/issues/1526#issuecomment-610670026).
+
+First, create a script named `lsp.sh` and paste the following code into it:
+
+```bash title="lsp.sh"
+#!/bin/bash
+
+# Configure node-gyp with pnpm
+if ! pnpm node-gyp configure --release -- -f gyp.generator.compile_commands_json.py >/dev/null 2>&1; then
+	echo "Error configuring node-gyp."
+	exit 1
+fi
+
+# Move compile_commands.json and remove 'Release' directory
+if ! mv Release/compile_commands.json ./ >/dev/null 2>&1 || ! rm -r Release >/dev/null 2>&1; then
+	echo "Error moving compile_commands.json or removing 'Release' directory."
+	exit 1
+fi
+
+# Remove extra compile_commands.json and their directories
+EXTRA=$(find . -mindepth 2 -name 'compile_commands.json')
+if ! echo "$EXTRA" | xargs rm -f >/dev/null 2>&1; then
+	echo "Error removing extra compile_commands.json files."
+	exit 1
+fi
+
+# Remove empty directories
+echo "$EXTRA" | xargs -n1 dirname | while read -r dir; do
+	if [ -z "$(ls -A "$dir")" ]; then
+		if ! rm -r "$dir" >/dev/null 2>&1; then
+			echo "Error removing empty directory: $dir"
+			exit 1
+		fi
+	fi
+done
+
+# Retrieve and escape compiler flags
+ESCAPED_FLAGS=$(echo | cc -Wp,-v -x c++ - -fsyntax-only 2>&1 |
+	grep -E '^ /' | sed 's/^ /-isystem /' | sed 's/\//\\\//g' | tr '\n' ' ')
+
+if [ -z "$ESCAPED_FLAGS" ]; then
+	echo "Error retrieving compiler flags."
+	exit 1
+fi
+
+# Update compile_commands.json
+if ! awk -i inplace -v flags="$ESCAPED_FLAGS" '{gsub(/ -c /, " " flags " -c "); print}' compile_commands.json >/dev/null 2>&1; then
+	echo "Error updating compile_commands.json."
+	exit 1
+fi
+```
+
+Make sure to give execute permission to the script:
+
+```bash title="Terminal"
+chmod +x lsp.sh
+```
+
+Now, add the following line to your `package.json` under the "scripts" section:
+
+```json title="package.json" {3}
+{
+  "scripts": {
+    "build": "node-gyp configure build && ./lsp.sh",
+    "dev": "node test.js",
+  }
+}
+```
+
+This way, the `lsp.sh` script will run automatically when you execute ```npm run build{:bash}``` or ```pnpm run build{:bash}```.
+
+With this setup, you can enjoy a more interactive and responsive development environment while working on your native Node.js modules. Feel free to integrate this with your favorite text editor or IDE that supports LSP for C/C++.
+
+This can be a boon for your productivity, especially if you're already accustomed to such features while working in TypeScript or Rust.
+
+This LSP setup will provide you with rich coding features such as autocompletion, go to definition, and real-time error checking, making your development process much smoother. 🌟
+
+### The Complexity of Direct Node API 😵‍💫
+
+The Direct Node API, often referred to as Node-API or N-API, is robust and extremely flexible but can be verbose and intricate.
+It exposes a set of primitive APIs that deal directly with JavaScript objects and values. Though it allows for high customization and
+deep integration, it requires you to handle several underlying complexities like object lifetimes, scopes, and type conversions manually.
+This can be cumbersome for those accustomed to more abstracted or user-friendly interfaces, especially when you just want to get a project
+off the ground.
+
+For example, the previous allegedly simple ```"Hello, World!"{:javascript}``` example using the Direct Node API would look like this:
+
+```cpp title="hello.cc"
+#include <node.h>
+
+void HelloWorld(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  v8::Isolate* isolate = args.GetIsolate();
+  args.GetReturnValue().Set(v8::String::NewFromUtf8(isolate, "Hello, World!"));
+}
+
+void Initialize(v8::Local<v8::Object> exports) {
+  NODE_SET_METHOD(exports, "hello", HelloWorld);
+}
+
+NODE_MODULE(NODE_GYP_MODULE_NAME, Initialize)
+```
+
+As you can see, even for a simple ```"Hello, World!"{:javascript}```, the code has a fair bit of boilerplate.
+
+### Why I Prefer node-addon-api 🌟
+
+For better usability, we will use [**node-addon-api**](https://github.com/nodejs/node-addon-api), an abstraction layer on top of the Direct Node API.
+It provides an object-oriented C++ API, which considerably simplifies the complexity and makes it easier to manage.
+It's essentially the C++ sugar on top of the Direct Node API's C-based interface.
+
+To give you a contrast, let's rewrite our ```"Hello, World!"{:javascript}``` example using `node-addon-api`:
+
+```cpp
+#include <napi.h>
+
+Napi::String HelloWorld(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  return Napi::String::New(env, "Hello, World from C++ [with NAPI]!");
+}
+
+Napi::Object Init(Napi::Env env, Napi::Object exports) {
+  exports.Set("hello", Napi::Function::New(env, HelloWorld));
+  return exports;
+}
+
+NODE_API_MODULE(NODE_GYP_MODULE_NAME, Init)
+```
+
+As you can see, this version of ```"Hello, World!"{:javascript}``` is cleaner and more straightforward.
+This is why we'll proceed with `node-addon-api` for our deeper exploration and for building our example application.
+With its simplified API and user-friendly features, `node-addon-api` is an excellent choice for developers looking to create native Node.js
+addons without diving deep into the intricacies of the Direct Node API.
+
+### Required Packages and Adapted `binding.gyp` 📦
+
+Before diving into the code, let's first install the necessary package for `node-addon-api`. Run the following command in your project directory:
+
+```bash
+pnpm add node-addon-api
+```
+
+#### Adapted `binding.gyp` 🛠️
+
+You'll also need to modify your `binding.gyp` file to include `node-addon-api`'s header files. Here's how your `binding.gyp` should look:
+
+```json title="binding.gyp"
+{
+  "targets": [
+    {
+      "target_name": "hello",
+      "sources": [ "hello.cc" ],
+      "include_dirs": [
+        "<!@(node -p \"require('node-addon-api').include\")"
+      ],
+      "dependencies": [
+        "<!(node -p \"require('node-addon-api').gyp\")"
+      ],
+      "cflags!": [ "-fno-exceptions" ],
+      "cflags_cc!": [ "-fno-exceptions" ],
+      "defines": [ "NAPI_DISABLE_CPP_EXCEPTIONS" ]
+    }
+  ]
+}
+```
+
+There is always cases of platform specific configurations like the following, but I wont be covering them here:
+
+```json title="binding.gyp"
+{
+  "targets": [
+    {
+      "target_name": "hello",
+      "sources": [ "hello.cc" ],
+      "include_dirs": [
+        "<!@(node -p \"require('node-addon-api').include\")"
+      ],
+      "dependencies": [
+        "<!(node -p \"require('node-addon-api').gyp\")"
+      ],
+      "cflags!": [ "-fno-exceptions" ],
+      "cflags_cc!": [ "-fno-exceptions" ],
+      "defines": [ "NAPI_DISABLE_CPP_EXCEPTIONS" ],
+      "xcode_settings": {
+        "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
+        "CLANG_CXX_LIBRARY": "libc++",
+        "MACOSX_DEPLOYMENT_TARGET": "10.7"
+      },
+      "msvs_settings": {
+        "VCCLCompilerTool": {
+          "ExceptionHandling": 1
+        }
+      }
+    }
+  ]
+}
+```
+
+### Understanding the ```<!@(){:bash}``` and ```<!(){:bash}``` Syntax in `binding.gyp` 🔍
+
+In your `binding.gyp` file, you might have noticed some unfamiliar syntax: ```<!@(){:bash}``` and ```<!(){:bash}```. These are special directives that help with dynamic evaluation within the `.gyp` files. Let's break down what each does:
+
+- ```<!(){:bash}```: This directive allows you to execute a shell command. The output of this command is then captured and used in the `.gyp` file.
+
+    For instance, ```<!(node -p "require('node-addon-api').gyp"){:bash}``` executes the node command that fetches the path to the `.gyp` file of the `node-addon-api` package.
+
+- ```<!@(){:bash}```: Similar to the previous one, this directive also executes a shell command. However, the output is tokenized by whitespace, allowing you to capture multiple output entries.
+
+    In ```<!@(node -p "require('node-addon-api').include"){:bash}```, the command fetches the include directories for `node-addon-api`,
+    and because we use ```<!@(){:bash}```, multiple directories would be handled correctly if present.
+
+Understanding these directives gives you the flexibility to perform more complex operations dynamically, right within your `binding.gyp` configuration.
+
+### Re-Structuring the File Structure for Better Organization 🗂️
+
+Now that we've got a basic ```"Hello World"{:javascript}``` example up and running, let's go a step further and reorganize our project structure
+for better maintainability and scalability.
+
+#### Target Structure
+- `./addon/src`: This is where all your C++ `.cc` files will reside.
+- `./addon/include`: This folder will contain all your header `.hpp` files.
+- `./lib/binding.js`: A JavaScript wrapper around the native node bindings.
+- `./tests`: This will contain all your test files.
+
+
+---
+
+```cpp title="addon/include/fast-image-resizer/hello.hpp"
+#pragma once
+
+#include <napi.h>
+
+namespace fast_image_resizer {
+  Napi::String hello_world(const Napi::CallbackInfo &info);
+}
+```
+
+```cpp title="addon/include/fast-image-resizer/exports.hpp"
+#pragma once
+
+#include <napi.h>
+
+namespace fast_image_resizer {
+  void exports(Napi::Env env, Napi::Object exports);
+}
+```
+
+---
+
+```cpp title="addon/src/fast-image-resizer/hello.cc"
+#include <fast-image-resizer/hello.hpp>
+
+namespace fast_image_resizer {
+  Napi::String hello_world(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+    return Napi::String::New(env, "Hello, World from C++ [with NAPI]!");
+  }
+}  // namespace fast_image_resizer
+```
+
+```cpp title="addon/src/fast-image-resizer/exports.cc"
+#include <fast-image-resizer/exports.hpp>
+#include <fast-image-resizer/hello.hpp>
+
+namespace fast_image_resizer {
+  void exports(Napi::Env env, Napi::Object exports) {
+    exports.Set("helloWorld", Napi::Function::New(env, fast_image_resizer::hello_world));
+  }
+}  // namespace fast_image_resizer
+```
+
+```cpp title="addon/src/entrypoint.cc"
+#include <napi.h>
+
+#include <fast-image-resizer/exports.hpp>
+
+Napi::Object Init(Napi::Env env, Napi::Object exports) {
+  fast_image_resizer::exports(env, exports);
+
+  return exports;
+}
+
+NODE_API_MODULE(NODE_GYP_MODULE_NAME, Init)
+```
+
+Resulting in the following tree:
+
+```bash title="Terminal"
+tree addon
+addon
+├── include
+│   └── fast-image-resizer
+│       ├── exports.hpp
+│       └── hello.hpp
+└── src
+    ├── entrypoint.cc
+    └── fast-image-resizer
+        ├── exports.cc
+        └── hello.cc
+
+5 directories, 5 files
+```
+
+#### Updated `binding.gyp`
+
+To facilitate this restructured file hierarchy, we'll need to modify our `binding.gyp` file. We'll configure it to automatically detect all `.cc` and `.hpp` files in their respective directories. Here is how to do it:
+
+```json title="binding.gyp" {4,6,9-11}
+{
+  "targets": [
+    {
+      "target_name": "fast-image-resizer",
+      "sources": [
+        "<!@(find addon/src -name *.cc)",
+      ],
+      "include_dirs": [
+        "<!(node -p \"require('node-addon-api').include_dir\")",
+        "/usr/local/include/",
+        "<(module_root_dir)/addon/include"
+      ],
+      "dependencies": [
+        "<!(node -p \"require('node-addon-api').gyp\")"
+      ],
+      "cflags!": [ "-fno-exceptions" ],
+      "cflags_cc!": [ "-fno-exceptions" ],
+      'defines': [ 'NAPI_DISABLE_CPP_EXCEPTIONS' ]
+    }
+  ]
+}
+```
+
+Here, the ```find{:bash}``` shell command recursively looks for `.cc` and `.hpp` files within `./addon/src` and `./addon/include`, respectively.
+This way, as you add more source and header files to these folders, you won't need to manually update `binding.gyp`.
+
+#### JavaScript Wrapper (`./lib/binding.ts`)
+
+Having a JavaScript wrapper around your native module can provide a cleaner and more JavaScript-friendly API.
+You can simply require your native addon and wrap its functionalities in this file.
+
+```ts title="lib/binding.ts"
+import { helloWorld } from "../build/Release/fast-image-resizer.node";
+
+export { helloWorld };
+```
+
+#### Test Directory (`./tests`) 🧪
+
+To ensure the reliability of our native module, it's essential to include automated tests. We'll be using the Node.js Test API for this purpose.
+
+First, add the `tsx` library as a dev dependency, as we'll use it to transpile and run our TypeScript test files.
+
+```bash title="Terminal"
+pnpm i -D tsx
+```
+
+Next, update your `package.json` file to include the following test command:
+
+```json title="package.json" {3-4}
+{
+  "scripts": {
+    "build": "node-gyp configure build && ./scripts/lsp.sh",
+    "test": "tsx --test tests/*"
+  },
+}
+```
+
+> Btw, I just moved lsp.sh to a `scripts` directory.
+
+This command will transpile and execute all test files located in the `tests/` directory.
+
+Now, let's write our test using the Node.js Test API. Create a TypeScript file in your `./tests` directory with the following code:
+
+```ts title="tests/dummy.test.ts"
+import { describe, it } from "node:test";
+import assert from "node:assert";
+
+import { helloWorld } from "../lib/binding";
+
+describe("helloWorld", () => {
+  it("should return 'Hello, World from C++ [with NAPI]!'", () => {
+    assert.strictEqual(helloWorld(), "Hello, World from C++ [with NAPI]!");
+  });
+});
+```
+
+This test uses the `describe` and `it` functions from the Node.js Test API along with the `assert` module to ensure that the `helloWorld` function behaves as expected.
+
+To run the tests, execute the following command from the root of your project:
+
+```bash title="Terminal"
+npm test
+```
+
+```ansi
+> tsx --test tests/*
+
+▶ helloWorld
+  [32m✔ should return 'Hello, World from C++ [with NAPI]!' [90m(0.295912ms)[39m[39m
+[32m▶ [39mhelloWorld [90m(1.314167ms)[39m
+
+[34mℹ duration_ms 92.176873[39m
+```
+
+The `tsx --test tests/*` command will take care of transpiling the TypeScript files and running the tests. Ensure that all tests pass to verify the functionality of your native module.
+
+Profit 📈.
+
+### Finalizing the Implementation: Image Resizing with OpenCV 🖼️🛠️
+
+Having set up the fundamental aspects of our environment, we're ready to tackle a more intricate
+task — building a native module to resize images. In this endeavor, we will employ the powerful OpenCV C++ library.
+
+#### Installing OpenCV Dependency
+
+The steps to install OpenCV may vary depending on your operating system:
+
+- **Ubuntu/Linux**
+  ```bash title="Terminal"
+  sudo apt-get install libopencv-dev
+  ```
+
+  <br />
+  ---
+  <br />
+
+  ```bash title="Terminal (I use arch, btw)"
+  pacman -S opencv
+  ```
+
+  **Note:** For Arch users, installing `hdf5` and `vtk` may also be necessary.
+  <br />
+
+  ---
+
+- **macOS**
+  ```bash
+  brew install opencv
+  ```
+
+---
+
+- **Windows**
+  Download and install from [OpenCV's website](https://opencv.org/releases/).
+
+#### Update binding.gyp
+
+Next, tweak your binding.gyp file to accommodate OpenCV headers and libraries. Take note that if you encounter issues with
+```pkg-config --cflags{:bash}```, specifying the full path to the headers might resolve the issue.
+
+```json title="binding.gyp" {12-14,16-18}
+{
+  "targets": [
+    {
+      "target_name": "addon",
+      "sources": [
+        "./addon/src/*.cc"
+      ],
+      "include_dirs": [
+        "<!(node -p \"require('node-addon-api').include_dir\")",
+        "<(module_root_dir)/addon/include",
+        "/usr/local/include/",
+        "/usr/include/opencv4" # In my case it was located here
+        # you can also try `<!@(pkg-config --cflags opencv4)` but
+        # for me it was not working properly
+      ],
+      "libraries": [
+        "<!(pkg-config --libs opencv4 2>/dev/null || echo '')" # In case of errors
+      ],
+      "dependencies": [
+        "<!(node -p \"require('node-addon-api').gyp\")",
+      ],
+      "cflags!": [ "-fno-exceptions", "-std=c++20" ],
+      "cflags_cc!": [ "-fno-exceptions", "-std=c++20" ],
+      'defines': [ 'NAPI_DISABLE_CPP_EXCEPTIONS' ]
+    }
+  ]
+}
+```
+
+#### C++ Code
+
+Start by declaring new functions in `addon/include/fast-image-resizer/resize.hpp`.
+The ```Napi::Value get_file_dimensions(const Napi::CallbackInfo &info){:cpp}``` function will serve as a helper for testing,
+negating the need to worry about its JavaScript implementation.
+
+```cpp title="addon/include/fast-image-resizer/resize.hpp"
+#pragma once
+
+#include <napi.h>
+
+namespace fast_image_resizer {
+  Napi::Value resize(const Napi::CallbackInfo &info);
+  Napi::Value get_file_dimensions(const Napi::CallbackInfo &info);
+}  // namespace fast_image_resizer
+```
+
+Then, proceed to flesh out the logic in `addon/src/fast-image-resizer/resize.cc`.
+First, we import the required headers, followed by parameter validation based on the API we're targeting.
+
+```cpp title="addon/src/fast-image-resizer/resize.cc" {1-8}
+#include <fast-image-resizer/resize.hpp>
+
+#include <cstdint>
+#include <filesystem>
+
+#include <opencv2/core/mat.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+
+namespace fast_image_resizer {
+
+  Napi::Value resize(const Napi::CallbackInfo &info) {
+  }
+
+  Napi::Value get_file_dimensions(const Napi::CallbackInfo &info) {
+  }
+}
+```
+
+The API we will create expects an input path and dimensions for width and height.
+
+```ts title="lib/binding.ts"
+export function resize(
+  inputPath: string,
+  width: number,
+  height: number,
+): void;
+```
+
+The resize operation will happen in-place — no bells and whistles. If you're looking to extend this functionality, the ball's in your court, reader 🤠.
+The first order of business is to validate the number and types of arguments passed in.
+
+```cpp title="addon/src/fast-image-resizer/resize.cc" {4-7,9-12}
+Napi::Value resize(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+
+  if (info.Length() < 3) {
+    Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  if (!info[0].IsString() || !info[1].IsNumber() || !info[2].IsNumber()) {
+    Napi::TypeError::New(env, "Wrong arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+}
+```
+
+You could consider a more elegant JavaScript API that takes in an object instead of individual parameters.
+
+```ts title="lib/binding.ts"
+export function resize(
+  params: {
+    inputPath: string,
+    width: number,
+    height: number,
+  }
+): void;
+```
+
+---
+
+After validating the basics, the next step is to extract the parameters from the info object and ensure they're correct — like confirming
+the file path actually exists or that the dimensions are positive numbers.
+
+```cpp title="addon/src/fast-image-resizer/resize.cc" {4-6,9-12,15-18}
+Napi::Value resize(const Napi::CallbackInfo &info) {
+  // ...
+
+  std::filesystem::path path = {info[0].As<Napi::String>()};
+  int32_t width = info[1].As<Napi::Number>();
+  int32_t height = info[2].As<Napi::Number>();
+
+  // Validate path by empty string and by valid file
+  if (path.empty() || !std::filesystem::exists(path)) {
+    Napi::TypeError::New(env, "Wrong path " + path.string()).ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  // Validate width and height by positive values
+  if (width <= 0 || height <= 0) {
+    Napi::TypeError::New(env, "Wrong width or height").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+}
+```
+
+Finally, we get to the part where the actual resizing happens. This is a straightforward operation, thanks to OpenCV.
+
+```cpp title="addon/src/fast-image-resizer/resize.cc" {5,8,11}
+Napi::Value resize(const Napi::CallbackInfo &info) {
+  // ...
+
+  // Read image from path
+  cv::Mat image = cv::imread(path);
+
+  // Resize image
+  cv::resize(image, image, cv::Size(width, height));
+
+  // Write image to path
+  cv::imwrite(path, image);
+
+  return env.Null();
+}
+```
+
+<details>
+  <summary><strong>Here's the full code for the `resize` function for your reference.</strong></summary>
+
+```cpp title="addon/src/fast-image-resizer/resize.cc" {31,34,37}
+Napi::Value resize(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+
+  if (info.Length() < 3) {
+    Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  if (!info[0].IsString() || !info[1].IsNumber() || !info[2].IsNumber()) {
+    Napi::TypeError::New(env, "Wrong arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  std::filesystem::path path = {info[0].As<Napi::String>()};
+  int32_t width = info[1].As<Napi::Number>();
+  int32_t height = info[2].As<Napi::Number>();
+
+  // Validate path by empty string and by valid file
+  if (path.empty() || !std::filesystem::exists(path)) {
+    Napi::TypeError::New(env, "Wrong path " + path.string()).ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  // Validate width and height by positive values
+  if (width <= 0 || height <= 0) {
+    Napi::TypeError::New(env, "Wrong width or height").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  // Read image from path
+  cv::Mat image = cv::imread(path);
+
+  // Resize image
+  cv::resize(image, image, cv::Size(width, height));
+
+  // Write image to path
+  cv::imwrite(path, image);
+
+  return env.Null();
+}
+```
+
+</details>
+
+In addition to resizing, it's often necessary to gather information about an image, like its dimensions.
+Let's explore how this could be implemented. For the dimensions, the approach is quite similar to the resizing logic.
+We use OpenCV to read the image and then extract its width and height.
+
+```cpp title="dimensions.cpp" {1,3-5}
+cv::Mat image = cv::imread(path);
+
+Napi::Object dimensions = Napi::Object::New(env);
+dimensions.Set("width", image.cols);
+dimensions.Set("height", image.rows);
+```
+
+<details>
+  <summary><strong>Here is the full code for the `getFileDimensions` function:</strong></summary>
+
+```cpp title="addon/src/fast-image-resizer/resize.cc" {23,25-27,29}
+Napi::Value get_file_dimensions(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+
+  if (info.Length() < 1) {
+    Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  if (!info[0].IsString()) {
+    Napi::TypeError::New(env, "Wrong arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  std::filesystem::path path = {info[0].As<Napi::String>()};
+
+  // Validate path by empty string and by valid filesystem
+  if (path.empty() || !std::filesystem::exists(path)) {
+    Napi::TypeError::New(env, "Wrong path " + path.string()).ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  // Return dimensions
+  cv::Mat image = cv::imread(path);
+
+  Napi::Object dimensions = Napi::Object::New(env);
+  dimensions.Set("width", image.cols);
+  dimensions.Set("height", image.rows);
+
+  return dimensions;
+}
+```
+
+</details>
+
+Now, we just need to export this functions in `addon/src/fast-image-resizer/exports.cc`:
+
+```cpp title="addon/src/fast-image-resizer/exports.cc" {3,8-10}
+#include <fast-image-resizer/exports.hpp>
+#include <fast-image-resizer/hello.hpp>
+#include <fast-image-resizer/resize.hpp>
+
+namespace fast_image_resizer {
+  void exports(Napi::Env env, Napi::Object exports) {
+    exports.Set("helloWorld", Napi::Function::New(env, fast_image_resizer::hello_world));
+    exports.Set("resize", Napi::Function::New(env, fast_image_resizer::resize));
+    exports.Set("getFileDimensions",
+                Napi::Function::New(env, fast_image_resizer::get_file_dimensions));
+  }
+}  // namespace fast_image_resizer
+```
+
+#### JavaScript Wrapper
+
+Reflect these changes in the JavaScript wrapper to expose the new functionalities:
+
+```js title="lib/binding.js" {3-4,7}
+import {
+  helloWorld,
+  resize,
+  getFileDimensions,
+} from "../build/Release/fast-image-resizer.node";
+
+export { helloWorld, resize, getFileDimensions };
+```
+
+#### Update Tests
+
+I just got lazy and generate a random image through ```convert{:bash}``` with ```convert -size 200x200 xc:skyblue dummy.png{:bash}```
+
+Now in `./tests/resize.test.ts` I added a test to check if the original image was not 100x100 and if the resized image is 100x100:
+
+```ts title="tests/resize.test.ts"
+import { describe, it } from "node:test";
+import assert from "node:assert";
+
+import { resize, getFileDimensions } from "../lib/binding";
+
+describe("image", () => {
+  it("should have the correct dimensions", () => {
+    const { width, height } = getFileDimensions("./dummy.png");
+
+    assert.notEqual(width, 100);
+    assert.notEqual(height, 100);
+  });
+});
+
+describe("resize", () => {
+  it("should resize the image", () => {
+    resize("./dummy.png", 100, 100);
+
+    const { width, height } = getFileDimensions("./dummy.png");
+
+    assert.strictEqual(width, 100);
+    assert.strictEqual(height, 100);
+  });
+});
+```
+
+## Conclusion: The Power of Simplicity and What's Next 🎉🔮
+
+We've covered quite a bit of ground in this blog post. Starting from setting up your development environment to diving into the
+nitty-gritty details of native modules in Node.js, it's been a rewarding journey. Let's recap:
+
+- `Tools and Environment Setup`: We discussed the tools needed and initialized the project.
+- `Setting Up node-gyp`: We went through installing and verifying node-gyp for building native addons.
+- `First Native Module`: Introduced you to the world of C++ for Node.js through a simple ```"Hello, World!"{:javascript}``` example.
+- `Language Server Protocol`: Talked about the benefits of setting up LSP for a smoother development experience.
+- `Direct Node API vs node-addon-api`: We discussed why node-addon-api is the preferred way to interact with the Node.js runtime.
+- `Required Packages and Configuration`: Walked through additional setup steps, including editing binding.gyp.
+- `Project Structure`: We organized our files for better readability and maintainability.
+- `Final Implementation with OpenCV`: Demonstrated how to integrate OpenCV for image resizing.
+
+Surprisingly, it's not that complex to extend Node.js with native modules, especially when you're backed by the right tools and community support.
+
+### A Glimpse into the Future: Crafting Your Own Framework 🛠️🔮
+
+In our next blog post, **"Crafting Your Own Framework: A Masterclass on node-addon-api"**, I'll introduce you to a more ergonomic way to create native modules in C++.
+Imagine having better tooling to manage native modules, their dependencies, and handling the packaging efficiently — sounds exciting, right?
+
+### Packaging Native Modules 📦
+
+Packaging native modules is a topic that's often glossed over. It's crucial to manage dependencies and ensure that the compiled
+binary can be easily distributed and consumed. We'll delve into these intricate details and show you how to package your native modules
+like a pro in our upcoming post.
+
+---
+
+### Share Your Thoughts! 💭
+
+We've covered a lot, and your opinion matters. What did you find most helpful? Are there areas you'd like more clarity on? Feel free to share your thoughts, questions, and suggestions in the comments section below. Your feedback helps make this a more comprehensive resource for everyone involved. Looking forward to hearing from you! 🌟
+
+So, stay tuned! This journey is far from over, and the road ahead is filled with opportunities to refine and expand your skill set.
+See you in the next blog post!

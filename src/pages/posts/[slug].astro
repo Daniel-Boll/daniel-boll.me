@@ -12,6 +12,8 @@ import formatDate from "@/utils/formatDate";
 import { getOgImagePath } from "@/utils/open-graph/image-path";
 import Eye from "@/utils/icons/eye.astro";
 import TOC from "@/components/post/TOC.astro";
+import SeriesNextAndPrev from "@/components/series/SeriesNextAndPrev.astro";
+import SeriesPostList from "@/components/series/SeriesPostList.astro";
 
 export const prerender = true;
 
@@ -33,7 +35,15 @@ export async function getStaticPaths() {
 }
 
 const {
-  data: { title, publishedAt, description, cover, coverAlt },
+  data: {
+    title,
+    publishedAt,
+    description,
+    cover,
+    coverAlt,
+    seriesId,
+    orderInSeries,
+  },
   render,
   slug,
 } = Astro.props;
@@ -49,6 +59,8 @@ const og = {
   description: description,
   image: new URL(getOgImagePath(Astro.url.pathname), Astro.url.origin).href,
 };
+
+const isSeries = !!seriesId;
 ---
 
 <Layout title={title} og={og}>
@@ -69,6 +81,11 @@ const og = {
           <Eye />
           <Odometer client:only slug={slug} update /> views
         </div>
+        {
+          isSeries && (
+            <SeriesPostList seriesId={seriesId} orderInSeries={orderInSeries} />
+          )
+        }
         <hr class="my-4" />
         <div class="space-x-10 md:flex">
           <div class="w-full">
@@ -95,5 +112,10 @@ const og = {
       </div>
     </main>
   </div>
+  {
+    isSeries && (
+      <SeriesNextAndPrev seriesId={seriesId} orderInSeries={orderInSeries} />
+    )
+  }
   <CommentSection />
 </Layout>

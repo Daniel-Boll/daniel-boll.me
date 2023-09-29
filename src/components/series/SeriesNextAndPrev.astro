@@ -1,0 +1,59 @@
+---
+import { getCollection } from "astro:content";
+
+interface Props {
+  seriesId: string;
+  orderInSeries?: number;
+}
+
+const { seriesId, orderInSeries }: Props = Astro.props;
+
+const seriesPosts = (await getCollection("posts")).filter(
+  (post) => post.data.seriesId === seriesId
+);
+
+// Sort by orderInSeries
+seriesPosts.sort(
+  (a, b) => (a.data.orderInSeries ?? 0) - (b.data.orderInSeries ?? 0)
+);
+
+// Find next and previous posts
+const currentIndex = seriesPosts.findIndex(
+  (post) => post.data.orderInSeries === orderInSeries
+);
+const previousPost = seriesPosts[currentIndex - 1];
+const nextPost = seriesPosts[currentIndex + 1];
+---
+
+<!-- Navigation Section -->
+<div class="flex justify-between">
+  <!-- Previous Button -->
+  <div>
+    {
+      previousPost ? (
+        <a href={previousPost.slug} class="text-blue-500 hover:underline">
+          <i class="fa-solid fa-arrow-left" /> Previous
+        </a>
+      ) : (
+        <span class="text-gray-400">
+          <i class="fa-solid fa-arrow-left" /> Previous
+        </span>
+      )
+    }
+  </div>
+
+  <!-- Next Button -->
+  <div>
+    {
+      nextPost && !nextPost.data.planned ? (
+        <a href={nextPost.slug} class="text-blue-500 hover:underline">
+          Next <i class="fa-solid fa-arrow-right" />
+        </a>
+      ) : (
+        <span class="text-gray-400">
+          Next <i class="fa-solid fa-arrow-right" />
+        </span>
+      )
+    }
+  </div>
+</div>
