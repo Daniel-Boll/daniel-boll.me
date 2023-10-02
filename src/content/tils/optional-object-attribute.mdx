@@ -1,0 +1,59 @@
+---
+title: "Optional object attribute in JavaScript"
+publishedAt: 2023-10-02
+slug: "til-optional-object-attribute"
+tags: ["javascript", "typescript", "objects"]
+---
+
+In software development, you'll often encounter scenarios where you need to create an object with attributes that are conditionally added. This is quite a common task, but how you approach it can make a difference in the readability and efficiency of your code.
+
+Here's the traditional way many developers, including myself, have initially tackled this issue:
+
+```javascript title="Traditional Approach: Adding an optional attribute to an object"
+const obj = {
+  name: "John",
+  age: 30
+};
+
+// Conditionally add the 'address' attribute
+if (someCondition) {
+  obj.address = "Some address";
+}
+```
+
+This method gets the job done, but it's not the most elegant. You define the object and then later manipulate it to add more attributes. While there's nothing inherently wrong with this approach, it could lead to less readable code, especially when the objects become complex.
+
+A more refined way to tackle the same problem is by leveraging the power of the spread operator in JavaScript:
+
+```javascript title="Using the Spread Operator for Conditional Attributes"
+const obj = {
+  name: "John",
+  age: 30,
+  ...(someCondition && { address: "Some address" })
+};
+```
+
+In this approach, we incorporate the condition directly into the object declaration. By using the spread operator and a conditional expression, we ensure that the ```address{:javascript}``` attribute is only added if the condition evaluates to ```true{:javascript}```.
+This not only keeps our object clean but also allows us to define the object in a single, unified declaration, enhancing readability.
+
+Why does this work? Well, the spread operator conveniently ignores falsy values. That's why, when ```(someCondition){:javascript}``` is ```false{:javascript}```,
+the ```address{:javascript}``` attribute won't even be added to the object, keeping it neat and minimal.
+
+To illustrate the point about the spread operator ignoring falsy values, consider the following example:
+
+```javascript
+// Spread operator ignoring falsy values
+require("node:assert").deepEqual({
+  ...false,
+  ..."",
+  ...0,
+  ...null,
+  ...undefined,
+  ...NaN,
+  ...[]
+}, {});
+```
+
+Here, all the falsy values get ignored, resulting in an empty object.
+
+I found this elegant solution in a [Twitter post](https://twitter.com/wesbos/status/1707772976022647295), and it's a great example of how small tweaks can make your code more efficient and readable.
