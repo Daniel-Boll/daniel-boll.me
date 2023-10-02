@@ -4,7 +4,7 @@
 
 .post code {
   @apply rounded-md bg-black font-semibold px-1 py-[2px] text-orange-500;
-  @apply max-w-[600px] overflow-x-auto;
+  @apply min-w-full max-w-[600px] overflow-x-auto;
 }
 
 .post h1 {

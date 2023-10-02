@@ -26,17 +26,17 @@ const nextPost = seriesPosts[currentIndex + 1];
 ---
 
 <!-- Navigation Section -->
-<div class="flex justify-between">
+<div class="flex justify-between text-sm">
   <!-- Previous Button -->
   <div>
     {
       previousPost ? (
         <a href={previousPost.slug} class="text-blue-500 hover:underline">
-          <i class="fa-solid fa-arrow-left" /> Previous
+          <i class="fa-solid fa-arrow-left text-sm" /> Previous
         </a>
       ) : (
         <span class="text-gray-400">
-          <i class="fa-solid fa-arrow-left" /> Previous
+          <i class="fa-solid fa-arrow-left text-sm" /> Previous
         </span>
       )
     }
@@ -47,11 +47,11 @@ const nextPost = seriesPosts[currentIndex + 1];
     {
       nextPost && !nextPost.data.planned ? (
         <a href={nextPost.slug} class="text-blue-500 hover:underline">
-          Next <i class="fa-solid fa-arrow-right" />
+          Next <i class="fa-solid fa-arrow-right text-sm" />
         </a>
       ) : (
         <span class="text-gray-400">
-          Next <i class="fa-solid fa-arrow-right" />
+          Next <i class="fa-solid fa-arrow-right text-sm" />
         </span>
       )
     }
