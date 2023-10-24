@@ -14,6 +14,7 @@ import Eye from "@/utils/icons/eye.astro";
 import TOC from "@/components/post/TOC.astro";
 import SeriesNextAndPrev from "@/components/series/SeriesNextAndPrev.astro";
 import SeriesPostList from "@/components/series/SeriesPostList.astro";
+import { getImage } from "astro:assets";
 
 export const prerender = true;
 
@@ -41,6 +42,7 @@ const {
     description,
     cover,
     coverAlt,
+    ogImage,
     seriesId,
     orderInSeries,
   },
@@ -57,9 +59,10 @@ const {
 const og = {
   title: title,
   description: description,
-  image: cover
-    ? `${Astro.url.origin}${cover.src}`
-    : new URL(getOgImagePath(Astro.url.pathname), Astro.url.origin).href,
+  image:
+    cover && ogImage
+      ? new URL(ogImage, Astro.url.origin).href
+      : new URL(getOgImagePath(Astro.url.pathname), Astro.url.origin).href,
 };
 
 const isSeries = !!seriesId;

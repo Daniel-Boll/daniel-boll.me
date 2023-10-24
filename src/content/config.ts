@@ -6,6 +6,7 @@ const posts = defineCollection({
     z.object({
       cover: image().optional(),
       coverAlt: z.string().optional(),
+      ogImage: z.string().optional(),
 
       title: z.string(),
       description: z.string(),
