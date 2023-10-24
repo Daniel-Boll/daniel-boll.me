@@ -1,0 +1,298 @@
+---
+title: "Unfurling Feature Flags: Controlling Rollouts at the Nginx Level 🚩"
+publishedAt: 2023-10-23
+description: "Explore the magic of feature flags with Nginx: from setup to real-world transitions between Next.js and Nuxt"
+slug: "feature-flags-at-the-nginx-level"
+cover: "src/assets/posts/07/hd-banner.png"
+coverAlt: "The banner of this post"
+---
+
+import { Image } from "astro:assets";
+
+import firstPageSrc from "../../assets/posts/07/config_cat_first_page.png";
+import configuringFlagSrc from "../../assets/posts/07/configuring_flag.png";
+import flagSpecSrc from "../../assets/posts/07/flag_spec.png";
+import showcaseSrc from "../../assets/posts/07/showcase.mp4";
+
+Hello, fellow developers and tech enthusiasts! Today, I'm diving deep into an exciting journey where we tinker with Nginx, wield the power of feature flags, and orchestrate controlled rollouts of our web pages. Sit tight; it's going to be a thrilling ride! 🎢
+
+## Prelude to Innovation: Why This Matters 🤔
+
+Before we dive into the technical nitty-gritty, let's pause and ponder why this endeavor matters. In the fast-paced world of web development, deploying new features is a double-edged sword 🗡️. It's exhilarating yet perilous. One tiny bug, and boom! You're trending on social media for all the wrong reasons.
+
+That's where feature flags come in, acting as our safety nets. They give us the power to toggle features on or off with the flick of a switch. But, what if we took it up a notch and implemented these toggles at the Nginx level? That's the voyage I embarked upon, and spoiler alert: it's possible, and I'm going to show you how!
+
+## Setting the Stage: Nginx and Feature Flags 🎬
+
+First things first, let's talk about our main actor, Nginx. This high-performance HTTP server is a star in its own right, but not all setups are created equal. For our purposes, we need Nginx compiled with the `http_auth_request_module`. Fear not, for verifying this is a piece of cake 🍰! Just whip open your terminal and run:
+
+```shell title="Terminal"
+nginx -V 2>&1 | rg 'http_auth_request_module'
+```
+
+If you see ```--with-http_auth_request_module{:bash}``` in the output, congratulations! 🎉 You're good to go.
+If not, well, it's time for a little recompilation side quest.
+
+## "Auth" You Ready? Configuring Nginx 🛠️
+
+With the preliminaries out of the way, we're delving into the heart of our journey - Nginx configuration.
+Our goal here is to create a sort of "fork in the road" for incoming requests, directing them towards either our new
+shiny feature or the reliable old page, based on our feature flag's status.
+
+Here's a sneak peek of what the configuration looks like:
+
+```nginx title="nginx.conf"
+server {
+  listen <port>;
+
+  location = /auth {
+    internal;
+    proxy_pass <auth_server>;
+    proxy_pass_request_body off;
+    proxy_set_header Content-Length "";
+    proxy_set_header X-Original-URI $request_uri;
+  }
+
+  location / {
+    auth_request /auth;
+    error_page 401 = @deny;
+    proxy_pass <app_a>;
+  }
+
+  location @deny {
+    proxy_pass <app_b>;
+  }
+}
+```
+
+Looks neat, right? But there's a lot going on here, so let's unpack it 🧳:
+
+1. **/auth**: Our internal checkpoint. It's not accessible to the outside world but is pivotal for our setup. It proxies the request to an external authentication server, which will give the thumbs up 👍 (or down 👎) based on the feature flag status.
+
+2. **/**: The standard route. It's like the main entrance 🚪, where every request first knocks. Using the ```auth_request{:nginx}```,
+it consults the ```location = /auth{:nginx}```. If ```location = /auth{:nginx}``` returns a ```200{:javascript}``` status, the gates open wide
+to the promised land of ```app_a{:nginx}```. A ```401{:javascript}```, though? They're diverted to the ```@deny{:nginx}``` route.
+
+3. **@deny**: Our plan B, the alternative route. If ```/auth{:nginx}``` gives a ```401{:javascript}```, this is where requests get rerouted,
+landing them in the realm of ```app_b{:nginx}```.
+
+## Authenticating Like a Boss: The Auth Server 🕵️
+
+Now, onto our authentication server, the unsung hero of this setup. This server's task is straightforward yet crucial:
+check the feature flag and give a green or red light 🚦.
+
+Here's a stripped-down version of what the server might look like, written in TypeScript with the help of 🍞 [Bun](https://bun.sh) using ```"configcat-js-ssr"{:javascript}```
+for feature flag magic:
+
+```typescript title="bun-server.mts"
+import { PollingMode, getClient } from "configcat-js-ssr";
+
+const client = getClient(
+  "SDK_KEY",
+  PollingMode.AutoPoll,
+);
+
+async function getKey() {
+  await client.forceRefreshAsync();
+
+  const key = await client.getValueAsync("<key>", false);
+
+  return new Response("", {
+    status: key ? 200 : 401,
+  });
+}
+
+Bun.serve({
+  port: 5000,
+  async fetch(request) {
+    const url = new URL(request.url);
+
+    if (url.pathname === "/auth") return await getKey();
+
+    return new Response("Not found", { status: 404 });
+  },
+});
+```
+
+It refreshes the feature flag values and responds with the appropriate status code, all based on the majestic power of feature flags.
+
+## Switching Scenes: From Next.js to Nuxt 🏡➡️🏰
+
+After setting the stage with Nginx and our auth server, it's time for a real-world rehearsal:
+transitioning from a default Next.js 13 home page to a Nuxt home page. This switcheroo is not just about flaunting fresh features;
+it's a testament to the flexibility our setup offers. So, let's roll up our sleeves and get our hands dirty with some code! 👨‍💻👩‍💻
+
+### Nuxt's Grand Entrance
+
+Let's kick things off by orchestrating a Nuxt application into existence with Bun:
+
+```bash title="Terminal"
+bunx nuxi@latest init project-a
+```
+
+After which, a quick saunter into the directory and a chant of:
+
+```bash title="Terminal"
+bun dev
+```
+
+summons Nuxt to grace my port ```3001{:js}``` with its presence.
+
+### Next.js 13's Encore
+
+```bash title="Terminal"
+bunx create-next-app@latest
+✔ What’s the name of your masterpiece? … project-b
+✔ Fancy a bit of TypeScript magic? … No / Yes
+✔ How about the keen eye of ESLint? … No / Yes
+✔ Craving the finesse of Tailwind CSS? … No / Yes
+✔ Seeking refuge in a `src/` directory haven? … No / Yes
+✔ Embarking on a journey with the App Router? (wise choice) … No / Yes
+✔ Dream of customizing the default import alias (@/*)? … No / Yes
+```
+
+A hop, skip, and jump into the directory followed by the incantation:
+
+```bash title="Terminal"
+bun dev
+```
+
+ushers Next back for an encore on my port ```3002{:js}```.
+
+### The Art of Flag Waving
+
+Next, I enlist the prowess of [ConfigCat](https://configcat.com/) to choreograph the flags. Sure, feature flags can be as simple as a hidden rabbit in a hat, but a maestro like ConfigCat orchestrates a ballet, like enabling only a select 10% of my audience to preview the new act, with the elegance of a seasoned conductor.
+
+The auditorium's first view should resemble this:
+
+<Image
+  src={firstPageSrc}
+  alt="The opening view of ConfigCat"
+  class="self-center md:h-1/2 md:w-full"
+/>
+
+<figcaption class="text-center text-xs italic">
+  <strong>Figure 1:</strong> Your initial glimpse upon entering the ConfigCat auditorium
+</figcaption>
+
+I then proceed to craft a new flag for this theatrical:
+
+<Image
+  src={configuringFlagSrc}
+  alt="The crafting of the feature flag"
+  class="self-center md:h-1/2 md:w-full"
+/>
+
+<figcaption class="text-center text-xs italic">
+  <strong>Figure 2:</strong> The art of feature flag configuration
+</figcaption>
+
+Upon the final curtain of setup, the stage reveals:
+
+<Image
+  src={flagSpecSrc}
+  alt="The feature flag’s final form"
+  class="self-center md:h-1/2 md:w-full"
+/>
+
+<figcaption class="text-center text-xs italic">
+  <strong>Figure 3:</strong> The full splendor of the feature flag
+</figcaption>
+
+Don’t forget to secure your SDK key from the 'View SDK Key' button.
+
+### The Conductor: Our Server
+
+A slight tweak in the server's score, conducted with Bun's baton, harmonizes our composition:
+
+```ts title="bun-server.mts"
+import {
+  LogLevel,
+  PollingMode,
+  createConsoleLogger,
+  getClient,
+} from "configcat-js-ssr";
+
+const maestro = createConsoleLogger(LogLevel.Info);
+
+const client = getClient(
+  "<YOUR-SDK-KEY>",
+  PollingMode.AutoPoll,
+  { logger: maestro },
+);
+
+async function getKey() {
+  await client.forceRefreshAsync();
+
+  const key = await client.getValueAsync("viewPageFromNuxt", false);
+
+  return new Response("", { status: key ? 200 : 401 });
+}
+
+Bun.serve({
+  port: 5000,
+  async fetch(request) {
+    const url = new URL(request.url);
+
+    if (url.pathname === "/auth") return await getKey();
+
+    return new Response("Not found", { status: 404 });
+  },
+});
+```
+
+### Nginx: The Stage Manager
+
+With our actors (ports, really) in place, the script remains much the same:
+
+```nginx title="nginx.conf"
+server {
+  listen 8081;
+
+  location = /auth {
+    internal;
+    proxy_pass http://localhost:5000;
+    proxy_pass_request_body off;
+    proxy_set_header Content-Length "";
+    proxy_set_header X-Original-URI $request_uri;
+  }
+
+  location / {
+    auth_request /auth;
+    error_page 401 = @deny;
+    proxy_pass http://localhost:3001;
+  }
+
+  location @deny {
+    proxy_pass http://localhost:3002;
+  }
+}
+```
+
+By tuning in to the rather obscure frequency of port 8081, my production now seamlessly alternates between a Next.js encore and a Nuxt debut, depending on the `viewPageFromNuxt` flag's whims. The audience, none the wiser, revels in the performance, oblivious to the magic unfurling backstage. 🎭✨
+
+## The Grand Reveal: Feature Flag in Action! 🎬✨
+
+Words are compelling, but seeing is believing, right? After all this backstage hustle, it's time for the spotlight moment. Below, you'll find a real-time performance of our feature flag directing the show. With a simple flick of the switch, watch the stage as it alternates between our Next.js and Nuxt setups. No smoke and mirrors here; it's all the magic of well-orchestrated tech! 🪄
+
+<video controls>
+  <source src={showcaseSrc} type="video/mp4" />
+</video>
+
+<figcaption class="text-center text-xs italic">
+  <strong>Figure 4:</strong> The seamless transition between Next.js and Nuxt, directed live by our feature flag.
+</figcaption>
+
+Witnessing the live transition, you can appreciate the fluidity and control this setup grants us. Whether it's for A/B testing, phased rollouts, or safe migrations, feature flags have proven to be the discreet stage managers of our productions. They empower us to put on a seamless show, where the audience gets to experience only the best performances!
+
+## To Infinity and Beyond: Next Steps 🚀
+
+While our current setup is nothing short of awesome, it's just the tip of the iceberg ❄️. Scaling this logic to support multiple pages and flags? That's our next Everest. And though it's beyond today's tale, rest assured, it's a challenge I'm ready to tackle head-on.
+
+## Curtain Call: Final Thoughts 🎭
+
+Navigating the tumultuous seas of feature releases can be daunting, but with our Nginx-level feature flags, we've got a robust new vessel 🚢. This approach isn't just about fancy tech—it's about control, confidence, and the courage to innovate without fear of capsizing.
+
+So, to my fellow tech adventurers, I say: Set sail. Explore. And may your feature releases always be smooth sailing! 🌊
+
+_Until our next tech odyssey!_ ✨

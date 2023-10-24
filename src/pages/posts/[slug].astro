@@ -57,7 +57,10 @@ const {
 const og = {
   title: title,
   description: description,
-  image: new URL(getOgImagePath(Astro.url.pathname), Astro.url.origin).href,
+  image: new URL(
+    cover ? cover.src : getOgImagePath(Astro.url.pathname),
+    Astro.url.origin
+  ).href,
 };
 
 const isSeries = !!seriesId;
