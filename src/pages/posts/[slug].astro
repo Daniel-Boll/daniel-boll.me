@@ -58,7 +58,7 @@ const og = {
   title: title,
   description: description,
   image: cover
-    ? cover.src
+    ? `${Astro.url.origin}${cover.src}`
     : new URL(getOgImagePath(Astro.url.pathname), Astro.url.origin).href,
 };
 
