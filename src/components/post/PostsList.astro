@@ -6,7 +6,12 @@ export interface Props {
   posts: CollectionEntry<"posts">[];
 }
 
-const { posts } = Astro.props;
+const posts = Astro.props.posts.sort((a, b) => {
+  return (
+    new Date(b.data.publishedAt).getTime() -
+    new Date(a.data.publishedAt).getTime()
+  );
+});
 ---
 
 <article class="flex flex-col gap-4">
