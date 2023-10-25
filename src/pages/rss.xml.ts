@@ -16,6 +16,5 @@ export const GET: APIRoute = async ({ site }) => {
       description: post.data.description,
       link: `/posts/${post.slug}/`,
     })),
-    stylesheet: "/pretty-feed-v3.xsl",
   });
 };
