@@ -1,8 +1,7 @@
-import fs from "fs";
+import * as fs from "fs";
 import tailwind from "@astrojs/tailwind";
 import sitemap from "@astrojs/sitemap";
 import mdx from "@astrojs/mdx";
-import prefetch from "@astrojs/prefetch";
 import preact from "@astrojs/preact";
 import vercel from "@astrojs/vercel/serverless";
 import { defineConfig } from "astro/config";
@@ -12,10 +11,11 @@ import Icons from "unplugin-icons/vite";
 import { SITE_URL } from "./src/data/config";
 import { remarkReadingTime } from "./src/plugins";
 import partytown from "@astrojs/partytown";
+
 const prettyCodeOptions: PrettyCodeOptions = {
   keepBackground: false,
   theme: JSON.parse(
-    fs.readFileSync("./src/data/md-themes/moonlight.json", "utf8")
+    fs.readFileSync("./src/data/md-themes/moonlight.json", "utf8"),
   ),
 };
 
@@ -26,7 +26,6 @@ export default defineConfig({
     mdx(),
     tailwind(),
     sitemap(),
-    prefetch(),
     preact({
       compat: true,
     }),
@@ -42,8 +41,11 @@ export default defineConfig({
     remarkPlugins: [remarkReadingTime],
   },
   output: "server",
+  prefetch: true,
   adapter: vercel({
-    analytics: true,
+    webAnalytics: {
+      enabled: true,
+    },
     imageService: true,
     functionPerRoute: false,
   }),
