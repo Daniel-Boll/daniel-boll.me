@@ -3,7 +3,7 @@ import { SEO } from "astro-seo";
 import { SITE_URL } from "@/data/config";
 import { ViewTransitions } from "astro:transitions";
 import Analytics from "./analytics.astro";
-import { SpeedInsights } from '@vercel/speed-insights/next';
+import SpeedInsights from "@vercel/speed-insights/astro";
 
 type Props = {
   title?: string;
@@ -80,6 +80,5 @@ const openGraph = {
   <SpeedInsights />
   <script
     src="https://kit.fontawesome.com/0ef7289c09.js"
-    crossorigin="anonymous"
-  ></script>
+    crossorigin="anonymous"></script>
 </head>
