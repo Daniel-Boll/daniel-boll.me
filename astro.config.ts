@@ -13,49 +13,49 @@ import { remarkReadingTime } from "./src/plugins";
 import partytown from "@astrojs/partytown";
 
 const prettyCodeOptions: PrettyCodeOptions = {
-  keepBackground: false,
-  theme: JSON.parse(
-    fs.readFileSync("./src/data/md-themes/moonlight.json", "utf8"),
-  ),
+	keepBackground: false,
+	theme: JSON.parse(
+		fs.readFileSync("./src/data/md-themes/moonlight.json", "utf8"),
+	),
 };
 
 // https://astro.build/config
 export default defineConfig({
-  site: SITE_URL,
-  integrations: [
-    mdx(),
-    tailwind(),
-    sitemap(),
-    preact({
-      compat: true,
-    }),
-    partytown({
-      config: {
-        forward: ["dataLayer.push"],
-      },
-    }),
-  ],
-  markdown: {
-    syntaxHighlight: false,
-    rehypePlugins: [[rehypePrettyCode, prettyCodeOptions]],
-    remarkPlugins: [remarkReadingTime],
-  },
-  output: "server",
-  prefetch: true,
-  adapter: vercel({
-    webAnalytics: {
-      enabled: true,
-    },
-    imageService: true,
-    functionPerRoute: false,
-  }),
-  vite: {
-    plugins: [
-      Icons({
-        compiler: "jsx",
-        jsx: "preact",
-        autoInstall: true,
-      }),
-    ],
-  },
+	site: SITE_URL,
+	integrations: [
+		mdx(),
+		tailwind(),
+		sitemap(),
+		preact({
+			compat: true,
+		}),
+		partytown({
+			config: {
+				forward: ["dataLayer.push"],
+			},
+		}),
+	],
+	markdown: {
+		syntaxHighlight: false,
+		rehypePlugins: [[rehypePrettyCode, prettyCodeOptions]],
+		remarkPlugins: [remarkReadingTime],
+	},
+	output: "server",
+	prefetch: true,
+	adapter: vercel({
+		webAnalytics: {
+			enabled: true,
+		},
+		imageService: true,
+		functionPerRoute: false,
+	}),
+	vite: {
+		plugins: [
+			Icons({
+				compiler: "jsx",
+				jsx: "preact",
+				autoInstall: true,
+			}),
+		],
+	},
 });
