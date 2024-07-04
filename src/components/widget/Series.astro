@@ -1,0 +1,45 @@
+---
+import WidgetLayout from "./WidgetLayout.astro";
+
+import { i18n } from "../../i18n/translation";
+import I18nKey from "../../i18n/i18nKey";
+import { getSeriesList } from "../../utils/content-utils";
+import { getSeriesUrl } from "../../utils/url-utils";
+import ButtonLink from "../control/ButtonLink.astro";
+
+const series = await getSeriesList();
+
+const COLLAPSED_HEIGHT = "7.5rem";
+const COLLAPSE_THRESHOLD = 5;
+
+const isCollapsed = series.length >= COLLAPSE_THRESHOLD;
+
+interface Props {
+  class?: string;
+  style?: string;
+}
+const className = Astro.props.class;
+const style = Astro.props.style;
+---
+
+{
+series.length === 0 ? null : (
+  <WidgetLayout
+    name={i18n(I18nKey.series)}
+    id="series"
+    isCollapsed={isCollapsed}
+    collapsedHeight={COLLAPSED_HEIGHT}
+    class={className}
+    style={style}
+  >
+      {series.map((s) =>
+          <ButtonLink
+              url={getSeriesUrl(s.name)}
+              badge={s.count}
+              label=`View all posts in the ${s.name} series`
+          >
+              {s.name}
+          </ButtonLink>
+      )}
+  </WidgetLayout>)
+}

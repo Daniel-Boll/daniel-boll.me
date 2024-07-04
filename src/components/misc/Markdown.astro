@@ -1,9 +1,9 @@
 ---
-import '@fontsource-variable/jetbrains-mono';
-import '@fontsource-variable/jetbrains-mono/wght-italic.css';
+import "@fontsource-variable/jetbrains-mono";
+import "@fontsource-variable/jetbrains-mono/wght-italic.css";
 
 interface Props {
-    class: string;
+  class: string;
 }
 const className = Astro.props.class;
 ---
@@ -31,7 +31,9 @@ const className = Astro.props.class;
       wrapper.className = "relative code-block";
 
       let copyButton = document.createElement("button");
-      copyButton.className = "copy-btn btn-regular-dark absolute active:scale-90 h-8 w-8 top-2 right-2 opacity-75 text-sm p-1.5 rounded-lg transition-all ease-in-out";
+      copyButton.className = "copy-btn btn-regular-dark absolute active:scale-90 h-8 w-8 right-2 opacity-75 text-sm p-1.5 rounded-lg transition-all ease-in-out";
+      // if codeBlock sibling is a figcaption add `-top-1` otherwise top-2
+      copyButton.classList.add(codeBlock.previousElementSibling?.nodeName === "FIGCAPTION" ? "-top-1" : "top-2");
 
       codeBlock.setAttribute("tabindex", "0");
       if (codeBlock.parentNode) {
@@ -69,6 +71,61 @@ const className = Astro.props.class;
     @tailwind base;
     @tailwind components;
     @tailwind utilities;
+
+    [data-line] {
+      @apply border-l-2 border-l-transparent px-2;
+    }
+
+    img {
+      @apply rounded-lg;
+    }
+
+    [data-highlighted-line] {
+      background: rgba(200, 200, 255, 0.1);
+      @apply border-l-blue-400;
+    }
+
+    [data-highlighted-chars] {
+      @apply bg-zinc-600/50 rounded;
+      box-shadow: 0 0 0 4px rgb(82 82 91 / 0.5);
+    }
+
+    [data-chars-id] {
+      @apply shadow-none p-1 border-b-2;
+    }
+
+    [data-chars-id] span {
+      @apply !text-inherit;
+    }
+
+    [data-chars-id="v"] {
+      @apply !text-pink-300 bg-rose-800/50 border-b-pink-600 font-bold;
+    }
+
+    [data-chars-id="s"] {
+      @apply !text-yellow-300 bg-yellow-800/50 border-b-yellow-600 font-bold;
+    }
+
+    [data-chars-id="i"] {
+      @apply !text-purple-200 bg-purple-800/50 border-b-purple-600 font-bold;
+    }
+
+    [data-chars-id="g"] {
+      @apply !text-green-300 bg-green-800/50 border-b-green-600 font-bold;
+    }
+
+    [data-rehype-pretty-code-fragment] {
+      @apply w-full rounded-md;
+    }
+
+    [data-rehype-pretty-code-figure] div pre {
+      @apply mt-0 rounded-t-none p-0.5 pb-2;
+    }
+
+    [data-rehype-pretty-code-title] {
+      @apply w-full rounded-t-xl py-1 px-3 text-sm;
+      background: var(--codeblock-bg);
+    }
 
     @layer components {
         .btn-regular-dark {
@@ -157,7 +214,7 @@ const className = Astro.props.class;
       color: var(--inline-code-color)
       padding: 0.125rem 0.25rem
       border-radius: 0.25rem
-      overflow: hidden
+      overflow: scroll
       counter-reset: line
 
       &:before
@@ -331,6 +388,10 @@ const className = Astro.props.class;
       .gc-titlebar
         color: var(--btn-content)
 
+      .gc-avatar
+        align-items: center
+        align-self: center
+
       .gc-stars, .gc-forks, .gc-license, .gc-description
         color: var(--tw-prose-headings)
 
@@ -353,6 +414,7 @@ const className = Astro.props.class;
       .gc-titlebar-left
         display: flex
         flex-flow: row nowrap
+        align-items: center
         gap: 0.5rem
 
       .gc-repo

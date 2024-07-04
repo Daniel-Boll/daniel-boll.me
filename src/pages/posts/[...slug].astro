@@ -1,26 +1,32 @@
 ---
-import { getCollection } from 'astro:content';
-import MainGridLayout from "@layouts/MainGridLayout.astro";
-import ImageWrapper from "../../components/misc/ImageWrapper.astro";
-import {Icon} from "astro-icon/components";
-import PostMetadata from "../../components/PostMeta.astro";
-import {i18n} from "@i18n/translation";
-import I18nKey from "@i18n/i18nKey";
-import {getDir, getPostUrlBySlug} from "@utils/url-utils";
+import path from "node:path";
+
 import License from "@components/misc/License.astro";
-import {licenseConfig} from "src/config";
 import Markdown from "@components/misc/Markdown.astro";
-import path from "path";
-import {profileConfig} from "../../config";
-import {formatDateToYYYYMMDD} from "../../utils/date-utils";
+import I18nKey from "@i18n/i18nKey";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import PostMetadata from "@components/PostMeta.astro";
+import ImageWrapper from "@components/misc/ImageWrapper.astro";
+import CommentSection from "@/components/Utterances.astro";
+
+import { getCollection } from "astro:content";
+import { i18n } from "@i18n/translation";
+import { getDir, getPostUrlBySlug } from "@utils/url-utils";
+import { Icon } from "astro-icon/components";
+import { licenseConfig } from "src/config";
+import { profileConfig } from "../../config";
+import { formatDateToYYYYMMDD } from "../../utils/date-utils";
+
+export const prerender = true;
 
 export async function getStaticPaths() {
-    const blogEntries = await getCollection('posts', ({ data }) => {
-        return import.meta.env.PROD ? data.draft !== true : true;
-    });
-    return blogEntries.map(entry => ({
-        params: { slug: entry.slug }, props: { entry },
-    }));
+  const blogEntries = await getCollection("posts", ({ data }) => {
+    return import.meta.env.PROD ? data.draft !== true : true;
+  });
+  return blogEntries.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
 }
 
 const { entry } = Astro.props;
@@ -29,22 +35,31 @@ const { Content } = await entry.render();
 const { remarkPluginFrontmatter } = await entry.render();
 
 const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    "headline": entry.data.title,
-    "description": entry.data.description || entry.data.title,
-    "keywords": entry.data.tags,
-    "author": {
-        "@type": "Person",
-        "name": profileConfig.name,
-        "url": Astro.site
-    },
-    "datePublished": formatDateToYYYYMMDD(entry.data.published),
-    // TODO include cover image here
-}
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: entry.data.title,
+  description: entry.data.description || entry.data.title,
+  keywords: entry.data.tags,
+  author: {
+    "@type": "Person",
+    name: profileConfig.name,
+    url: Astro.site,
+  },
+  datePublished: formatDateToYYYYMMDD(entry.data.published),
+};
 
+const og = {
+  title: entry.data.title,
+  description: entry.data.description || entry.data.title,
+  image: entry.data.ogImage
+    ? new URL(entry.data.ogImage, Astro.url.origin).href
+    : new URL(`/open-graph/${entry.slug}.png`, Astro.url.origin).href,
+};
+
+console.log(entry.data.ogImage);
+console.log(og.image);
 ---
-<MainGridLayout banner={entry.data.image} title={entry.data.title} description={entry.data.description}>
+<MainGridLayout banner={entry.data.image} og={og}>
     <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
         <div id="post-container" class:list={["card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full ",
@@ -103,24 +118,25 @@ const jsonLd = {
             </Markdown>
 
             {licenseConfig.enable && <License title={entry.data.title} slug={entry.slug} pubDate={entry.data.published} class="mb-6 rounded-xl license-container onload-animation"></License>}
-
         </div>
     </div>
 
+    <CommentSection />
+
     <div class="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full">
-        <a href={getPostUrlBySlug(entry.data.nextSlug)} class="w-full font-bold overflow-hidden active:scale-95">
-            {entry.data.nextSlug && <div class="btn-card rounded-2xl w-full h-[3.75rem] max-w-full px-4 flex items-center justify-start gap-4" >
+        <a href={getPostUrlBySlug(entry.data.prevSlug)} class="w-full font-bold overflow-hidden active:scale-95">
+            {entry.data.prevSlug && <div class="btn-card rounded-2xl w-full h-[3.75rem] max-w-full px-4 flex items-center justify-start gap-4" >
                 <Icon name="material-symbols:chevron-left-rounded" size={32} class="text-[var(--primary)]" />
                 <div class="overflow-hidden transition overflow-ellipsis whitespace-nowrap max-w-[calc(100%_-_3rem)] text-black/75 dark:text-white/75">
-                    {entry.data.nextTitle}
+                    {entry.data.prevTitle}
                 </div>
             </div>}
         </a>
 
-        <a href={getPostUrlBySlug(entry.data.prevSlug)} class="w-full font-bold overflow-hidden active:scale-95">
-            {entry.data.prevSlug && <div class="btn-card rounded-2xl w-full h-[3.75rem] max-w-full px-4 flex items-center justify-end gap-4">
+        <a href={getPostUrlBySlug(entry.data.nextSlug)} class="w-full font-bold overflow-hidden active:scale-95">
+            {entry.data.nextSlug && <div class="btn-card rounded-2xl w-full h-[3.75rem] max-w-full px-4 flex items-center justify-end gap-4">
                 <div class="overflow-hidden transition overflow-ellipsis whitespace-nowrap max-w-[calc(100%_-_3rem)] text-black/75 dark:text-white/75">
-                    {entry.data.prevTitle}
+                    {entry.data.nextTitle}
                 </div>
                 <Icon name="material-symbols:chevron-right-rounded" size={32} class="text-[var(--primary)]" />
             </div>}

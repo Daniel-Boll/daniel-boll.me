@@ -2,6 +2,7 @@
 import Profile from "./Profile.astro";
 import Tag from "./Tags.astro";
 import Categories from "./Categories.astro";
+import Series from "./Series.astro";
 
 const className = Astro.props.class;
 ---
@@ -11,6 +12,7 @@ const className = Astro.props.class;
     </div>
     <div class="flex flex-col w-full gap-4 top-4 sticky top-4">
         <Categories class="onload-animation" style="animation-delay: 150ms"></Categories>
-        <Tag class="onload-animation" style="animation-delay: 200ms"></Tag>
+        <Series class="onload-animation" style="animation-delay: 200ms"></Series>
+        <Tag class="onload-animation" style="animation-delay: 250ms"></Tag>
     </div>
 </div>

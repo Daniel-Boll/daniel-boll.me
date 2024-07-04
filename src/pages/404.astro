@@ -1,0 +1,15 @@
+---
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+
+export const prerender = true;
+---
+
+<MainGridLayout og={{ title: "Not found" }}>
+  <div class="transition flex flex-col rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent md:gap-4 mb-4">
+    <button class="mt-4 px-4 py-2">
+      <a href="/" class="underline hover:decoration-secondary-500"
+        >Go to <span class="font-bold text-secondary-500">家</span></a
+      >
+    </button>
+  </div>
+</MainGridLayout>

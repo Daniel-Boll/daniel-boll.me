@@ -1,0 +1,26 @@
+---
+import { getSeriesList } from "@utils/content-utils";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import ArchivePanel from "@components/ArchivePanel.astro";
+import { i18n } from "@i18n/translation";
+import I18nKey from "@i18n/i18nKey";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const series = await getSeriesList();
+  return series.map((s) => {
+    return {
+      params: {
+        series: s.name,
+      },
+    };
+  });
+}
+
+const { series } = Astro.params;
+---
+
+<MainGridLayout title={i18n(I18nKey.series)} description={i18n(I18nKey.series)}>
+    <ArchivePanel series={[series]}></ArchivePanel>
+</MainGridLayout>

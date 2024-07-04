@@ -2,24 +2,24 @@
 import Layout from "./Layout.astro";
 import Navbar from "@components/Navbar.astro";
 import SideBar from "@components/widget/SideBar.astro";
-import {pathsEqual} from "@utils/url-utils";
 import Footer from "@components/Footer.astro";
 import BackToTop from "@components/control/BackToTop.astro";
-import {siteConfig} from "@/config";
 
 interface Props {
-    title: string;
-    banner?: string;
+  banner?: string;
+  og?: {
+    title?: string;
+    type?: string;
     description?: string;
+    image?: string;
+    alt?: string;
+  };
 }
 
-const { title, banner, description } = Astro.props
-const isHomePage = pathsEqual(Astro.url.pathname, '/')
-const enableBanner = siteConfig.banner.enable
-
+const { banner, og } = Astro.props;
 ---
 
-<Layout title={title} banner={banner} description={description}>
+<Layout banner={banner} og={og}>
 <slot slot="head" name="head"></slot>
 <div class="max-w-[var(--page-width)] min-h-screen grid grid-cols-[17.5rem_auto] grid-rows-[auto_auto_1fr_auto] lg:grid-rows-[auto_1fr_auto]
     mx-auto gap-4 relative px-0 md:px-4"

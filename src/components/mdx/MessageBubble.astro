@@ -1,0 +1,34 @@
+---
+export interface Props {
+  speaker: "me" | "reader";
+  small?: boolean;
+}
+
+const { speaker, small } = Astro.props;
+
+const isMe = speaker === "me";
+const bubbleClasses = isMe
+  ? "bg-[var(--card-bg-darker)] border-2 border-dashed border-[var(--primary)] text-[var(--tw-prose-body)]"
+  : "bg-[var(--card-bg-darker)] border-2 border-dashed border-[var(--secondary)] text-[var(--tw-prose-body)]";
+const avatarClasses = "bg-[var(--primary)] text-[var(--card-bg)]";
+const avatarEmoji = isMe ? "🎴" : "👤";
+const bubbleSize = small ? "w-1/3 self-end" : "w-full";
+---
+
+<div class=`flex items-end ${small && "justify-end"} space-x-2 mb-4`>
+  {!isMe && (
+    <div class={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${avatarClasses}`}>
+      {avatarEmoji}
+    </div>
+  )}
+  <div class={`relative ${bubbleSize} p-3 rounded-lg ${bubbleClasses}`}>
+    <div class="font-iosevka">
+      <slot />
+    </div>
+  </div>
+  {isMe && (
+    <div class={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${avatarClasses}`}>
+      {avatarEmoji}
+    </div>
+  )}
+</div>

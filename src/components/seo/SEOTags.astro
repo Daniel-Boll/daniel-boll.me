@@ -1,0 +1,79 @@
+---
+import { SEO } from "astro-seo";
+import Analytics from "./analytics.astro";
+import SpeedInsights from "@vercel/speed-insights/astro";
+
+type Props = {
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+  og?: {
+    title?: string;
+    type?: string;
+    description?: string;
+    image?: string;
+    alt?: string;
+  };
+};
+
+const { title, description, noindex, og } = Astro.props;
+
+const DEFAULT_TITLE_PAGE = "Daniel Boll";
+const DEFAULT_DESCRIPTION_PAGE =
+  "I'm a Tech Lead from Brazil. Open source is my jam.";
+const DEFAULT_URL_SITE = "https://daniel-boll.me";
+
+const openGraph = {
+  title: og?.title || title || DEFAULT_TITLE_PAGE,
+  type: og?.type || "website",
+  image: og?.image || "/opengraph-image.png",
+  alt: og?.alt || "Daniel Boll",
+  url: DEFAULT_URL_SITE,
+  description: og?.description || description || DEFAULT_DESCRIPTION_PAGE,
+};
+---
+
+<SEO
+  charset="UTF-8"
+  title={openGraph.title}
+  description={openGraph.description}
+  noindex={noindex || false}
+  openGraph={{
+    basic: {
+      title: openGraph.title,
+      type: openGraph.type,
+      image: openGraph.image,
+    },
+    image: {
+      alt: openGraph.alt,
+    },
+  }}
+  twitter={{
+    creator: "@db_regret",
+  }}
+  extend={{
+    link: [
+      { rel: "sitemap", href: "/sitemap-index.xml" },
+    ],
+    meta: [
+      { property: "og:site_name", content: "Daniel Boll" },
+      { property: "og:description", content: openGraph.description },
+      { property: "og:url", content: Astro.url.toString() },
+      { name: "author", content: "Daniel Boll" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "generator", content: Astro.generator },
+      {
+        name: "twitter:image",
+        content: openGraph.image,
+      },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:url", content: Astro.url.toString() },
+      { name: "twitter:title", content: openGraph.title },
+      { name: "twitter:description", content: openGraph.description },
+      { name: "twitter:site", content: "@db_regret" },
+    ],
+  }}
+/>
+<link rel="sitemap" href="/sitemap-index.xml" />
+<Analytics />
+<SpeedInsights />
