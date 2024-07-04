@@ -131,16 +131,16 @@ export default defineConfig({
       ],
     ],
   },
-  output: "server",
+  // output: "server",
   prefetch: true,
-  adapter: vercel({
-    webAnalytics: {
-      enabled: true,
-    },
-    imageService: true,
-    functionPerRoute: false,
-    // isr: true,
-  }),
+  // adapter: vercel({
+  //   webAnalytics: {
+  //     enabled: true,
+  //   },
+  //   imageService: true,
+  //   functionPerRoute: false,
+  //   // isr: true,
+  // }),
   vite: {
     build: {
       rollupOptions: {
