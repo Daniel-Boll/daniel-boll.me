@@ -45,8 +45,8 @@ const prettyCodeOptions: import("rehype-pretty-code").Options = {
 // https://astro.build/config
 export default defineConfig({
   site: "https://daniel-boll.me",
-  base: "/",
-  trailingSlash: "always",
+  // base: "/",
+  trailingSlash: "ignore",
   integrations: [
     mdx(),
     tailwind(),
