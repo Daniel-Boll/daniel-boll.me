@@ -16,8 +16,9 @@ ogImage: /assets/charydbis.js/thumb_02.png
 import Trivia from "@components/mdx/Trivia.astro";
 import MessageBubble from "@components/mdx/MessageBubble.astro";
 
-So ultimately I have been working in an unofficial version of the [ScyllaDB](https://www.scylladb.com/) driver for the Node.JS environment.
-For those who are not aware \<explain what scylladb is here, linking discord blog post too\>.
+So ultimately I have been working on an unofficial version of the [ScyllaDB](https://www.scylladb.com/) driver for the Node.JS environment.
+For those who are not aware, ScyllaDB is a highly performant, low-latency NoSQL database compatible with Apache Cassandra.
+It offers features like Shard Awareness and superior scalability. For more information on how awesome it is, you can check out this [Discord blog post](https://discord.com/blog/how-discord-stores-trillions-of-messages).
 
 <MessageBubble speaker="reader">
   Wait, Daniel, even their tutorials include a [Javascript driver
@@ -26,61 +27,61 @@ For those who are not aware \<explain what scylladb is here, linking discord blo
 </MessageBubble>
 
 <MessageBubble speaker="me">
-  Well, you may be right, but actually the driver in these guides are related to
+  Well, you may be right, but actually the driver in these guides is related to
   the Cassandra one. It works with Scylla easily as it's compatible, thankfully.
-  The problem is that, of course, Scylla specific features won't be available,
+  The problem is that, of course, Scylla-specific features won't be available,
   such as [Shard
-  Awareness](https://python-driver.docs.scylladb.com/stable/scylla-specific.html#shard-awareness)
+  Awareness](https://python-driver.docs.scylladb.com/stable/scylla-specific.html#shard-awareness).
 </MessageBubble>
 
-All things considered the development of the ScyllaDB driver is going pretty well wrapping the Rust driver through a native module integration.
-If you are not aware on how this stuff works I have a in-depth [series on native modules](/archive/series/Going%20Native%20On%20JS/).
+All things considered, the development of the ScyllaDB driver is going pretty well, wrapping the Rust driver through a native module integration.
+If you are not aware of how this stuff works, I have an in-depth [series on native modules](/archive/series/Going%20Native%20On%20JS/).
 
 ::github{repo="daniel-boll/scylla-javascript-driver"}
 
-And to test it's capabilities I decided to implement a project using it, thankfully Scylla already have a showcase project which is also
-written in multiple other drivers which is also good in the comparison standpoint. The project is [care-pet](https://iot.scylladb.com/stable/) a step-by-step guide to build an IoT project connected to Scylla Cloud.
+And to test its capabilities, I decided to implement a project using it. Thankfully, Scylla already has a showcase project, which is also
+written in multiple other drivers, which is good from a comparison standpoint. The project is [care-pet](https://iot.scylladb.com/stable/), a step-by-step guide to building an IoT project connected to Scylla Cloud.
 
 ::github{repo="scylladb/care-pet"}
 
-But even though the driver itself provide a lot of flexibility and power it's usually pretty cumbersome to work directly with the barebones driver, hence why so many ORMs exists. So
-I though to myself, why not create a ORM for the ScyllaDB in the Node.JS environment too? We already the awesome charydbis with the Rust gang.
+But even though the driver itself provides a lot of flexibility and power, it's usually pretty cumbersome to work directly with the barebones driver. Hence why so many ORMs exist. So
+I thought to myself, why not create an ORM for ScyllaDB in the Node.JS environment too? We already have the awesome [charydbis](https://github.com/nodecosmos/charybdis) with the Rust gang.
 
 ::github{repo="nodecosmos/charybdis"}
 
 <MessageBubble speaker="reader">
-  Bro, but why would you come up with a ORM only for ScyllaDB? Why don't you
-  extend something like TypeORM or even prisma?
+  Bro, but why would you come up with an ORM only for ScyllaDB? Why don't you
+  extend something like TypeORM or even Prisma?
 </MessageBubble>
 
 <MessageBubble speaker="me">
   TLDR: Sowwy, skill issue. 😔
 
-The thing is that it's not trivial to extend those guys, even more considering particular constraints of Scylla as it's [NoSQL wide-column database](https://www.scylladb.com/glossary/wide-column-database/).
+The thing is that it's not trivial to extend those guys, even more considering the particular constraints of Scylla as it's a [NoSQL wide-column database](https://www.scylladb.com/glossary/wide-column-database/).
 
 </MessageBubble>
 
 <MessageBubble speaker="reader">
-  Yeah, but prisma supports MongoDB which is also NoSQL! 😠
+  Yeah, but Prisma supports MongoDB which is also NoSQL! 😠
 </MessageBubble>
 
 <MessageBubble speaker="me">
-  I'm aware but creating a new engine for prisma is not that easy, took them a
-  lot of effort, and as a matter of fact there is already a [feature request for
-  ScyllaDB support](https://github.com/prisma/prisma/issues/2879) from 4 years
-  ago on which a lot of these details are discussed.
+  I'm aware, but creating a new engine for Prisma is not that easy. It took them
+  a lot of effort, and as a matter of fact, there is already a [feature request
+  for ScyllaDB support](https://github.com/prisma/prisma/issues/2879) from 4
+  years ago on which a lot of these details are discussed.
 </MessageBubble>
 
-So the shorter path is to straight up just get my decorators going on and try something, as I've already experienced [reflection in TS](/posts/a-breakfest-with-expressots-and-bun/) before it can't be that hard right?
+So the shorter path is to straight up just get my decorators going on and try something, as I've already experienced [reflection in TS](/posts/a-breakfest-with-expressots-and-bun/) before. It can't be that hard, right?
 
 <Trivia emoji="🕵️">
-  It shouldn't take a detective to know that this is the famous last words of
-  those who went down in a rabbit hole.
+  It shouldn't take a detective to know that these are the famous last words of
+  those who went down a rabbit hole.
 </Trivia>
 
 ## Decorating the entities
 
-Okay so roughly the API I want to achieve here is something in the lines of the following:
+Okay, so roughly the API I want to achieve here is something along the lines of the following:
 
 ```ts title="example.ts"
 import { Uuid } from "@lambda-group/scylladb";
@@ -98,13 +99,13 @@ class User extends BaseEntity {
 }
 ```
 
-Not to shaby amirite? Now let's get to the steps needed to achieve something like this. I will be omitting some code, so if you happen to be curious you can just check the repo.
+Not too shabby, am I right? Now let's get to the steps needed to achieve something like this. I will be omitting some code, so if you happen to be curious you can just check the repo.
 
 ::github{repo="daniel-boll/charydbis.js"}
 
 ### The `@Entity(){:ts}`
 
-Okay, so the job of this decorator is to mainly store the name of the table to be generated as of now.
+Okay, so the job of this decorator is mainly to store the name of the table to be generated as of now.
 
 ```ts title="decorators/entity.ts"
 export function Entity(tableName?: string) {
@@ -114,31 +115,31 @@ export function Entity(tableName?: string) {
 }
 ```
 
-Here the parameter is optional because we may just infer the table name from the class name itself, we just quickly transform the string in snake_case because Javascript classes
-are usually in PascalCase which doesn't align with most database patterns.
+Here, the parameter is optional because we may just infer the table name from the class name itself. We quickly transform the string into snake_case because JavaScript classes
+are usually in PascalCase, which doesn't align with most database patterns.
 
 <Trivia emoji="⁉️">
-  We are even considering adding something like transform to plural and stuff,
-  which would require a library because of the irregular stuff. If you have an
-  opinion on this, please leave a comment on this post.
+  We are even considering adding something like a transform to plural and other
+  modifications, which would require a library because of irregular forms. If
+  you have an opinion on this, please leave a comment on this post.
 </Trivia>
 
 ### The `Column{:ts}`
 
-Now the hard works begins, as we need to collect and store a lot of data about the attribute.
+Now the hard work begins, as we need to collect and store a lot of data about the attribute.
 
 <MessageBubble speaker="reader">
   Wait, that was it for the Entity decorator?
 </MessageBubble>
 
 <MessageBubble speaker="me">
-  Well, mostly yes, keep in mind we don't even have the migration step in a CLI or anything like this, this is more of a POC than a full blown project.
+  Well, mostly yes. Keep in mind we don't even have the migration step in a CLI or anything like this. This is more of a POC than a full-blown project.
 
 At least when this post goes to air.
 
 </MessageBubble>
 
-Continuing with the column we will get something like this:
+Continuing with the column, we will get something like this:
 
 ```ts title="decorators/column.ts" {7-8,27-34}
 export function Column(options?: ColumnOptions | string) {
@@ -179,8 +180,7 @@ export function Column(options?: ColumnOptions | string) {
 }
 ```
 
-Don't mind the efficiency of this code, it didn't even saw the light of refactoring yet. Here it mainly is trying to collect automatically
-data about the attributes type through the \[G\]old `import "reflect-metadata"{:ts}` with `Reflect.getMetadata("design:type", target, key){:ts}` and then coercing it to the types we support:
+Don't mind the efficiency of this code, it hasn't even seen the light of refactoring yet. Here it mainly tries to collect data about the attribute's type automatically through the \[G\]old `import "reflect-metadata"{:ts}` with `Reflect.getMetadata("design:type", target, key){:ts}` and then coerces it to the types we support:
 
 ```ts title="decorators/column.ts"
 const getColumnType = (type?: string): ColumnType => {
@@ -200,7 +200,7 @@ const getColumnType = (type?: string): ColumnType => {
 };
 ```
 
-and then storing the information in the class at a `columns` field.
+and then stores the information in the class's `columns` field.
 
 ### Repository
 
