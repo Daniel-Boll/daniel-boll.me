@@ -1,4 +1,4 @@
-import rss from "@astrojs/rss";
+import rss, { pagesGlobToRssItems, type RSSFeedItem } from "@astrojs/rss";
 import { siteConfig } from "@/config";
 import { getCollection } from "astro:content";
 import sanitizeHtml from "sanitize-html";
