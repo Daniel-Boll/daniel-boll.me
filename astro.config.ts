@@ -138,7 +138,7 @@ export default defineConfig({
       enabled: true,
     },
     imageService: true,
-    // functionPerRoute: false,
+    functionPerRoute: false,
     isr: true,
   }),
   vite: {
