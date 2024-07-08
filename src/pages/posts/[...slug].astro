@@ -55,9 +55,6 @@ const og = {
     ? new URL(entry.data.ogImage, Astro.url.origin).href
     : new URL(`/open-graph/${entry.slug}.png`, Astro.url.origin).href,
 };
-
-console.log(entry.data.ogImage);
-console.log(og.image);
 ---
 <MainGridLayout banner={entry.data.image} og={og}>
     <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
