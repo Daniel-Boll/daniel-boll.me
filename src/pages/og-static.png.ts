@@ -2,7 +2,8 @@ import { generateOgImageForPost } from "@utils/generate-og-images";
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
 
-export const prerender = false;
+// NOTE: Uncomment this to see the image in the browser
+// export const prerender = false;
 
 export const GET: APIRoute = async ({ url }) => {
   const slug = url.searchParams.get("slug");

@@ -1,0 +1,22 @@
+---
+export interface Props {
+	emoji: string;
+}
+
+const { emoji } = Astro.props;
+---
+
+<div class="px-0 md:px-12">
+  <div class={
+    "p-4 bg-[var(--card-bg-darker)] border-[var(--primary)] border-2 border-dashed rounded-lg shadow-md flex items-center space-x-4"
+    }>
+    <div class="flex-shrink-0">
+      <div class="text-2xl">
+        {emoji}
+      </div>
+    </div>
+    <div class="font-iosevka">
+      <slot />
+    </div>
+  </div>
+</div>
