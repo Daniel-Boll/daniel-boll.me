@@ -1,0 +1,13 @@
+---
+export interface Props {
+	caption: string;
+	index: number;
+}
+
+const { caption, index } = Astro.props;
+---
+
+<figcaption class="text-center text-xs italic">
+  <strong>Figure {index}:</strong>
+  {caption}
+</figcaption>

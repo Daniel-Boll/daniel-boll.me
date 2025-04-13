@@ -1,0 +1,40 @@
+---
+import { Icon } from "astro-icon/components";
+
+interface Props {
+	url?: string;
+	label?: string;
+}
+
+const { url, label } = Astro.props;
+---
+<a href={url} target="_blank" rel="noopener noreferrer" aria-label={label}>
+    <button
+        class:list={`
+            w-full
+            h-10
+            rounded-lg
+            bg-none
+            hover:bg-[var(--btn-plain-bg-hover)]
+            active:bg-[var(--btn-plain-bg-active)]
+            transition-all
+            pl-2
+            hover:pl-3
+            
+            text-neutral-700
+            hover:text-[var(--primary)]
+            dark:text-neutral-300
+            dark:hover:text-[var(--primary)]
+        `
+        }
+    >
+        <div class="flex items-center justify-between relative mr-2">
+            <div class="overflow-hidden text-left whitespace-nowrap overflow-ellipsis">
+                <slot></slot>
+            </div>
+            <div class="transition ml-4 text-black/50 dark:text-white/50">
+                <Icon name="material-symbols:open-in-new-rounded" class="h-4 w-4" />
+            </div>
+        </div>
+    </button>
+</a> 

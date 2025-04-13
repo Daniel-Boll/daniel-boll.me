@@ -19,6 +19,7 @@ import { GithubCardComponent } from "./src/plugins/rehype-component-github-card.
 import { GithubProfileComponent } from "./src/plugins/rehype-component-github-profile.mjs";
 import { parseDirectiveNode } from "./src/plugins/remark-directive-rehype.js";
 import { remarkExcerpt } from "./src/plugins/remark-excerpt.js";
+import remarkImageCaption from "./src/plugins/remark-image-caption.ts";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 import mdx from "@astrojs/mdx";
 
@@ -80,6 +81,12 @@ export default defineConfig({
       remarkDirective,
       remarkSectionize,
       parseDirectiveNode,
+      [
+        remarkImageCaption,
+        {
+          className: "image-caption",
+        },
+      ],
     ],
     rehypePlugins: [
       rehypeKatex,
