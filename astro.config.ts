@@ -1,8 +1,7 @@
 import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
-import tailwind from "@astrojs/tailwind";
+import tailwindcss from "@tailwindcss/vite";
 import swup from "@swup/astro";
-// import vercel from "@astrojs/vercel";
 import Compress from "astro-compress";
 import icon from "astro-icon";
 import { defineConfig } from "astro/config";
@@ -22,24 +21,22 @@ import { remarkExcerpt } from "./src/plugins/remark-excerpt.js";
 import remarkImageCaption from "./src/plugins/remark-image-caption.ts";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 import mdx from "@astrojs/mdx";
+import { unified } from "@astrojs/markdown-remark";
 
 // https://astro.build/config
 export default defineConfig({
   site: "https://daniel-boll.me/",
   base: "/",
   trailingSlash: "ignore",
-  // adapter: vercel({
-  //   webAnalytics: {
-  //     enabled: true,
-  //   },
-  //   devImageService: "sharp",
-  //   imageService: false,
-  // }),
+  /*
+   * Astro 7 changed the default from `true` to `"jsx"`, which strips whitespace between
+   * inline elements React-style. That silently glued navigation text together
+   * ("Home Archive About CV" -> "HomeArchiveAboutCV"), which degrades text extraction,
+   * screen readers and Pagefind indexing. Keep the pre-7 behaviour.
+   */
+  compressHTML: true,
   integrations: [
     mdx(),
-    tailwind({
-      nesting: true,
-    }),
     swup({
       theme: false,
       animationClass: "transition-swup-", // see https://swup.js.org/options/#animationselector
@@ -73,6 +70,12 @@ export default defineConfig({
     }),
   ],
   markdown: {
+    /*
+     * Astro 7 switched the default Markdown processor to Sätteri. This site relies on a
+     * long remark/rehype chain (katex, sectionize, directives, custom components,
+     * autolink headings), so keep the unified processor explicitly.
+     */
+    processor: unified(),
     remarkPlugins: [
       remarkMath,
       remarkReadingTime,
@@ -131,6 +134,7 @@ export default defineConfig({
     ],
   },
   vite: {
+    plugins: [tailwindcss()],
     optimizeDeps: {
       exclude: ["@resvg/resvg-js"],
     },

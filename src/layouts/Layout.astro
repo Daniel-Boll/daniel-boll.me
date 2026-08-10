@@ -5,6 +5,8 @@ import "@fontsource/roboto/700.css";
 
 import { profileConfig, siteConfig } from "@/config";
 import ConfigCarrier from "@components/ConfigCarrier.astro";
+import Analytics from "@vercel/analytics/astro";
+import SpeedInsights from "@vercel/speed-insights/astro";
 import {
 	AUTO_MODE,
 	BANNER_HEIGHT,
@@ -18,6 +20,7 @@ import {
 import { defaultFavicons } from "../constants/icon";
 import type { Favicon } from "../types/config";
 import { url, pathsEqual } from "../utils/url-utils";
+import "../styles/global.css";
 import "katex/dist/katex.css";
 
 interface Props {
@@ -99,8 +102,6 @@ if (isHomePage) {
 	// Default fallback to main OG image
 	ogImageUrl = new URL("site-og.svg", baseUrl).toString();
 }
-
-console.log(ogImageUrl);
 ---
 
 <!DOCTYPE html>
@@ -191,6 +192,9 @@ console.log(ogImageUrl);
 
 		<!-- increase the page height during page transition to prevent the scrolling animation from jumping -->
 		<div id="page-height-extend" class="hidden h-[300vh]"></div>
+
+		<Analytics />
+		<SpeedInsights />
 	</body>
 </html>
 
@@ -199,7 +203,12 @@ console.log(ogImageUrl);
 	'banner-height-home': `${BANNER_HEIGHT_HOME}vh`,
 	'banner-height': `${BANNER_HEIGHT}vh`,
 }}>
-@tailwind components;
+/*
+ * This block is compiled on its own, so Tailwind 4 needs `@reference` to see the theme
+ * for the `@apply` calls below. `@reference` pulls in theme/variant context without
+ * emitting any CSS (the actual base/utilities come from styles/global.css).
+ */
+@reference "../styles/global.css";
 @layer components {
 	.enable-banner.is-home #banner-wrapper {
 		@apply h-[var(--banner-height-home)] translate-y-[var(--banner-height-extend)]
@@ -572,3 +581,44 @@ if (window.swup) {
 	document.addEventListener("swup:enable", setup)
 }
 </script>
+
+<!-- Vercel Web Analytics: count page views for swup's client-side navigations.
+     <Analytics /> runs with disableAutoTrack and fires its pageview from the
+     custom-element constructor. It sits outside swup's containers ("main", "#toc"),
+     so it is never re-instantiated; without this hook only the first page of a
+     session would be counted. `page:view` never fires for the initial load, so
+     the component's own pageview is not double counted.
+
+     Registration is guarded: swup runs with `updateHead: true`, so if Astro inlines
+     this script into <head> it re-executes on every visit and would stack a new
+     handler each time. -->
+<script>
+import { pageview } from "@vercel/analytics";
+
+if (!window.__vercelAnalyticsHooked) {
+	window.__vercelAnalyticsHooked = true
+
+	const setupAnalytics = () => {
+		window.swup.hooks.on("page:view", () => {
+			const path = window.location.pathname
+			pageview({ route: path, path })
+		})
+	}
+
+	if (window.swup) {
+		setupAnalytics()
+	} else {
+		document.addEventListener("swup:enable", setupAnalytics)
+	}
+}
+</script>
+
+<!-- Vercel Speed Insights (Core Web Vitals).
+     Deliberately the stock component rather than a hand-rolled `injectSpeedInsights` +
+     `setRoute` hook. `setRoute` works by writing `data-route` onto the injected <script>,
+     but swup runs with `updateHead: true` and strips dynamically-injected head scripts on
+     the first client-side navigation, so that handle would be mutating a detached node.
+     Web Analytics is unaffected because it reports through the in-memory `window.va`.
+     Trade-off: the vitals Vercel accumulates across an SPA session (INP, CLS) stay
+     attributed to the route the visitor landed on. Load metrics (LCP/FCP/TTFB), which are
+     what Speed Insights is mostly about, are per page load and unaffected. -->

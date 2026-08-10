@@ -123,7 +123,7 @@ export default async () => {
       width: 1200,
       height: 630,
       embedFont: true,
-      fonts: await loadGoogleFonts(siteConfig.title + siteConfig.subtitle),
+      fonts: await loadGoogleFonts(),
     },
   );
 };

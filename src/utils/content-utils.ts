@@ -1,30 +1,55 @@
-import { getCollection } from 'astro:content'
+import { getCollection, type CollectionEntry } from 'astro:content'
 import I18nKey from '@i18n/i18nKey'
 import { i18n } from '@i18n/translation'
 
-export async function getSortedPosts() {
-  const allBlogPosts = (await getCollection('posts', ({ data }) => {
+/** Newest first. */
+export async function getSortedPosts(): Promise<CollectionEntry<'posts'>[]> {
+  const allBlogPosts = await getCollection('posts', ({ data }) => {
     return import.meta.env.PROD ? data.draft !== true : true
-  }))
+  })
 
-  const sorted = allBlogPosts.sort(
-    (a, b) => {
-      const dateA = new Date(a.data.published)
-      const dateB = new Date(b.data.published)
-      return dateA > dateB ? -1 : 1
-    },
-  )
+  /*
+   * The previous comparator was `dateA > dateB ? -1 : 1`, which never returns 0. That is
+   * an inconsistent comparator: for two posts sharing a `published` date it always claims
+   * `a` sorts after `b`, so the final order depended on the order `getCollection()`
+   * happened to return. Two posts here do share a date (2023-01-20), so their relative
+   * order silently changed when the collection loader changed.
+   *
+   * Tie-break on `id` so the order is deterministic regardless of loader behaviour.
+   * Give posts distinct `published` dates if you want a specific order between them.
+   */
+  return allBlogPosts.sort((a, b) => {
+    const delta =
+      new Date(b.data.published).getTime() - new Date(a.data.published).getTime()
+    if (delta !== 0) return delta
+    return a.id.localeCompare(b.id)
+  })
+}
 
-  for (let i = 1; i < sorted.length; i++) {
-    sorted[i].data.nextSlug = sorted[i - 1].slug
-    sorted[i].data.nextTitle = sorted[i - 1].data.title
+export type AdjacentPost = {
+  id: string
+  title: string
+}
+
+/**
+ * Neighbours of `index` in a newest-first list.
+ * `next` is the newer post, `prev` the older one — matching the previous behaviour.
+ *
+ * Derived on read rather than written back onto `entry.data`: under the Content
+ * Layer API entries come from a persisted data store, so mutating `.data` after
+ * `getCollection()` is not supported.
+ */
+export function getAdjacentPosts(
+  posts: CollectionEntry<'posts'>[],
+  index: number,
+): { prev: AdjacentPost | null; next: AdjacentPost | null } {
+  const toAdjacent = (post?: CollectionEntry<'posts'>): AdjacentPost | null =>
+    post ? { id: post.id, title: post.data.title } : null
+
+  return {
+    next: index > 0 ? toAdjacent(posts[index - 1]) : null,
+    prev: index < posts.length - 1 ? toAdjacent(posts[index + 1]) : null,
   }
-  for (let i = 0; i < sorted.length - 1; i++) {
-    sorted[i].data.prevSlug = sorted[i + 1].slug
-    sorted[i].data.prevTitle = sorted[i + 1].data.title
-  }
-
-  return sorted
 }
 
 export type Tag = {

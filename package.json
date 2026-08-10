@@ -1,5 +1,5 @@
 {
-  "name": "fuwari",
+  "name": "daniel-boll.me",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
@@ -8,20 +8,21 @@
     "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
-    "type-check": "tsc --noEmit --isolatedDeclarations",
+    "type-check": "tsc --noEmit",
     "new-post": "node scripts/new-post.js",
     "format": "biome format --write ./src",
-    "lint": "biome check --write ./src",
-    "preinstall": "npx only-allow pnpm"
+    "lint": "biome check ./src",
+    "preinstall": "npx only-allow pnpm",
+    "lint:fix": "biome check --write ./src"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
-    "@astrojs/mdx": "^4.2.3",
-    "@astrojs/rss": "^4.0.11",
-    "@astrojs/sitemap": "^3.3.0",
-    "@astrojs/svelte": "7.0.9",
-    "@astrojs/tailwind": "^6.0.2",
-    "@astrojs/vercel": "^8.1.3",
+    "@astrojs/markdown-remark": "^7",
+    "@astrojs/markdown-satteri": "^0.3.5",
+    "@astrojs/mdx": "^7.0.5",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/svelte": "9.0.1",
     "@fastify/deepmerge": "^3.1.0",
     "@fontsource-variable/jetbrains-mono": "^5.2.5",
     "@fontsource/roboto": "^5.2.5",
@@ -33,8 +34,11 @@
     "@resvg/resvg-js": "^2.6.2",
     "@swup/astro": "^1.5.0",
     "@tailwindcss/typography": "^0.5.16",
-    "astro": "5.6.1",
-    "astro-compress": "^2.3.7",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
+    "astro": "7.2.0",
+    "astro-compress": "^2.4.3",
     "astro-icon": "^1.1.5",
     "hastscript": "^9.0.1",
     "katex": "^0.16.21",
@@ -58,9 +62,8 @@
     "sanitize-html": "^2.15.0",
     "satori": "^0.12.2",
     "sharp": "^0.33.5",
-    "stylus": "^0.64.0",
-    "svelte": "^5.25.6",
-    "tailwindcss": "^3.4.17",
+    "svelte": "^5.56.8",
+    "tailwindcss": "^4.3.3",
     "typescript": "^5.8.2",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0"
@@ -72,11 +75,10 @@
     "@types/lodash.kebabcase": "^4.1.9",
     "@types/markdown-it": "^14.1.2",
     "@types/mdast": "^4.0.4",
-    "@types/sanitize-html": "^2.15.0",
-    "postcss-import": "^16.1.0",
-    "postcss-nesting": "^13.0.1",
-    "vercel": "^41.4.1",
-    "vite": "^6.2.5"
+    "@types/sanitize-html": "^2.15.0"
   },
-  "packageManager": "pnpm@9.14.4"
+  "packageManager": "pnpm@9.14.4",
+  "engines": {
+    "node": ">=22.12.0"
+  }
 }

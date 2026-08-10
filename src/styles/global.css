@@ -1,0 +1,44 @@
+/*
+ * Single Tailwind 4 entry point for the site.
+ *
+ * Previously the project had no explicit CSS entry at all: `src/styles/*.css` were
+ * pulled into the bundle as an accidental side effect of the over-broad
+ * `import.meta.glob("../../**")` in `components/misc/ImageWrapper.astro`. That glob is
+ * now narrowed to image extensions, so these stylesheets are imported here explicitly
+ * and in a deliberate order.
+ *
+ * Imports must stay above the at-rules below.
+ */
+@import "tailwindcss";
+
+/* Custom properties first: everything after this consumes them. */
+@import "./variables.css";
+/* Shared component/utility classes (.card-base, .btn-*, .text-90, ...). */
+@import "./main.css";
+/* Long-form content styling, then the admonition/extras layer on top. */
+@import "./markdown.css";
+@import "./markdown-extend.css";
+/* Presentation extras. */
+@import "./transition.css";
+@import "./scrollbar.css";
+@import "./image-caption.css";
+@import "./photoswipe.css";
+
+@plugin "@tailwindcss/typography";
+
+/*
+ * Replaces `darkMode: "class"` from the old tailwind.config.cjs. Tailwind 4 defaults
+ * the `dark:` variant to `prefers-color-scheme`, but this site toggles a `.dark` class
+ * on <html> (see setting-utils.ts), so the class-based behaviour must be restored
+ * explicitly or every `dark:` utility silently changes meaning.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	/*
+   * Was `fontFamily.sans: ["Roboto", "sans-serif", ...defaultTheme.fontFamily.sans]`.
+   * The tail is Tailwind 3's default sans stack, kept verbatim.
+   */
+	--font-sans: "Roboto", sans-serif, ui-sans-serif, system-ui,
+		"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
